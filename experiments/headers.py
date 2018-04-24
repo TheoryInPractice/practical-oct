@@ -1,0 +1,33 @@
+"""Common table header names, for convenience."""
+
+TIMEOUT = 'Timeout'
+DATASET = 'Dataset'
+BF_DATASET = '\\textbf{Dataset}'
+PREPROCESSING = 'Preprocessing'
+SIZE = 'Size'
+TIME = 'Time'
+CERTIFICATE = 'Certificate'
+SOLVER = 'Solver'
+THREADS = 'Threads'
+MEMORY = 'Memory'
+FORMULATION = 'Formulation'
+VERTICES = 'Vertices'
+VERTICES_REMOVED = 'vertices_removed'
+LT_VERTICES_REMOVED = '$|V_r|$'
+LT_NUM_VERTICES = '$|V|$'
+LT_VP = "$|V' \cup V_b|$"
+EDGES = 'Edges'
+LT_NUM_EDGES = '$|E|$'
+LT_PREPROCESSED_EDGES = "$|E'|$"
+EDGES_REMOVED = 'edges_removed'
+LT_EDGES_REMOVED = '$|E_r|$'
+OPT = 'Opt'
+LT_OPT = '$OPT$'
+LT_PREPROCESSED_OPT = "$OPT'$"
+HTIME = 'HTime'
+RESULTS_FILE = 'Results File'
+VALID = 'Is Valid Certificate'
+OCT = 'oct'
+LT_VERTICES_OCT = '$|V_o|$'
+BIPARTITE = 'bipartite'
+LT_VERTICES_BIPARTITE = '$|V_b|$'
