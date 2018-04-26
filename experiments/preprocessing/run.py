@@ -3,6 +3,7 @@ from pathlib import Path
 import subprocess
 import time
 
+from experiments import PREPROCESSED_DATA_DIR
 from src.preprocessing.graphs import (
     read_beasley, read_huffner, read_edgelist,
     write_edgelist, write_huffner, write_snap,
@@ -70,8 +71,14 @@ def convert_huffner():
     original_dir = Path('.') / 'data' / 'original'
     preprocessed_dir = Path('.') / 'data' / 'preprocessed'
 
+    # Huffner files we don't preprocess
+    blacklist = ['aa12', 'j12', 'j27']
+
     # Identify the Huffner data
-    data_names = sorted(names_in_dir(original_dir / 'huffner', '.graph'))
+    data_names = sorted(filter(
+        lambda n: n not in blacklist,
+        names_in_dir(original_dir / 'huffner', '.graph')
+    ))
     print('Identified {} Huffner files'.format(len(data_names)))
 
     # Remove the old statistics CSV
@@ -476,6 +483,18 @@ if __name__ == '__main__':
         Path('.') / 'data' / 'original' / 'huffner', extension='.graph')])
     beasley_data = ['bqp50_{}'.format(i) for i in range(1, 11)] + ['bqp100_{}'.format(i) for i in range(1, 11)]
     gka_data = ['gka_{}'.format(i) for i in range(1, 36)]
+
+    # Write summary file headers
+    summry_dir = PREPROCESSED_DATA_DIR / 'summary'
+    summry_dir.mkdir(exist_ok=True, parents=True)
+    summary_headers = [
+        'name', 'vertices_removed',
+        'edges_removed', 'oct', 'bipartite'
+    ]
+    for s in ['beasley.csv', 'gka.csv', 'huffner.csv']:
+        f = summry_dir / s
+        with open(str(f), 'w') as summary:
+            summary.write(','.join(summary_headers))
 
     # Preprocess all data
     create_dirs()
