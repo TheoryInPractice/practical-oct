@@ -198,10 +198,10 @@ Summarizes Huffner experiment results. Requires the datafile `huffner_self_compa
 by the Huffner experiment. Summarizes the mean, standard deviation, and quartiles of the size of the
 returned OCT size in the latex table files
 
-* `preprocessing_level_0.01.tex`
-* `preprocessing_level_0.1.tex`
-* `preprocessing_level_1.tex`
-* `preprocessing_level_10.tex`
+* `timeout_0.01.tex`
+* `timeout_0.1.tex`
+* `timeout_1.tex`
+* `timeout_10.tex`
 
 For Huffner plots, run
 ```
