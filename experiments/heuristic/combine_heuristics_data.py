@@ -5,10 +5,10 @@
 from experiments import (
     headers,
     PREPROCESSING_TIMEOUTS,
-    PRINT_CONTEXT
+    PRINT_CONTEXT,
+    GROUND_TRUTH_DATA_FILE
 )
 from experiments.heuristic import (
-    GROUND_TRUTH_DATA_FILE,
     COMBINED_RESULTS_DATA_FILE,
     CPLEX_RESULTS_DATA_FILE,
     HEURISTICS_RESULTS_DATA_FILE,

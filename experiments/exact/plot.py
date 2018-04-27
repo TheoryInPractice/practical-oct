@@ -6,6 +6,7 @@ from experiments import (
     headers,
     TABLES_DIR,
     RESULTS_DIR,
+    GROUND_TRUTH_DATA_FILE
 )
 from experiments.datasets import preprocessed
 from experiments.exact import (
@@ -87,7 +88,7 @@ def main():
     c = c.reset_index().fillna('-')
 
     # Read metadata
-    gt = pandas.read_csv(str(RESULTS_DIR / 'ground_truth.csv'))
+    gt = pandas.read_csv(str(GROUND_TRUTH_DATA_FILE))
     gt = gt[[headers.DATASET, headers.SIZE]].rename(columns={
         headers.SIZE: headers.OPT
     })

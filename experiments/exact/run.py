@@ -9,7 +9,8 @@ from experiments import (
     HUFFNER_DATA_EXT,
     SNAP_DATA_DIR,
     SNAP_DATA_EXT,
-    EXACT_TIMEOUT
+    EXACT_TIMEOUT,
+    GROUND_TRUTH_DATA_FILE
 )
 from experiments.datasets import preprocessed as DATASETS
 from experiments.exact import (
@@ -25,6 +26,7 @@ from src.huffner.solver import solve as solve_ic
 from functools import partial
 from itertools import product
 import csv
+import pandas
 import subprocess
 import sys
 
@@ -67,6 +69,22 @@ def _run_ic(dataset):
         preprocessing=2,
         htime=min(0.3 * EXACT_TIMEOUT, 1)
     )
+
+
+def _generate_ground_truth():
+    """Generate the ground truth file from exact results."""
+
+    # Read exact results
+    exact = pandas.read_csv(str(EXACT_RESULTS_DATA_PATH))
+
+    # Subset to Akiba-Iwata
+    exact = exact[exact[headers.SOLVER] == AI]
+
+    # Pick only Dataset, Size, and Certificate
+    exact = exact[[headers.DATASET, headers.SIZE, headers.CERTIFICATE]]
+
+    # Write to csv
+    exact.to_csv(str(GROUND_TRUTH_DATA_FILE), index=False)
 
 
 def main():
@@ -123,6 +141,10 @@ def main():
                 *solution
             ])
             output.flush()
+
+    # Now generate the ground truth table if akiba_iwata was run
+    if (AI, _run_ai) in solvers:
+        _generate_ground_truth()
 
 
 # Invoke main

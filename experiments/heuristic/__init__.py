@@ -2,7 +2,6 @@
 
 from experiments import headers, RESULTS_DIR
 
-GROUND_TRUTH_DATA_FILE = RESULTS_DIR / 'ground_truth.csv'
 COMBINED_RESULTS_DATA_FILE = (
     RESULTS_DIR / 'combined_heuristics_experiment_results.csv'
 )

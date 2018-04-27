@@ -35,6 +35,7 @@ PRINT_CONTEXT = pandas.option_context(
 PROJECT_ROOT = Path(__file__).parent.parent
 EXPERIMENTS_DIR = PROJECT_ROOT / 'experiments'
 RESULTS_DIR = EXPERIMENTS_DIR / 'paper_results'
+GROUND_TRUTH_DATA_FILE = RESULTS_DIR / 'ground_truth.csv'
 PLOTS_DIR = PROJECT_ROOT / 'paper/figures'
 TABLES_DIR = PROJECT_ROOT / 'paper/tables'
 ORIGINAL_DATA_DIR = PROJECT_ROOT / 'data/original'
