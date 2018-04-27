@@ -34,7 +34,7 @@ PRINT_CONTEXT = pandas.option_context(
 # File system paths
 PROJECT_ROOT = Path(__file__).parent.parent
 EXPERIMENTS_DIR = PROJECT_ROOT / 'experiments'
-RESULTS_DIR = EXPERIMENTS_DIR / 'paper_results'
+RESULTS_DIR = PROJECT_ROOT / 'results'
 GROUND_TRUTH_DATA_FILE = RESULTS_DIR / 'ground_truth.csv'
 PLOTS_DIR = PROJECT_ROOT / 'figures'
 TABLES_DIR = PROJECT_ROOT / 'tables'
@@ -48,6 +48,7 @@ SNAP_DATA_EXT = '.snap'
 EDGELIST_DATA_DIR = PREPROCESSED_DATA_DIR / 'edgelist'
 EDGELIST_DATA_EXT = '.edgelist'
 BEASLEY_EXT = '.txt'
+RESULTS_DIR.mkdir(exist_ok=True, parents=True)
 PLOTS_DIR.mkdir(exist_ok=True, parents=True)
 TABLES_DIR.mkdir(exist_ok=True, parents=True)
 HUFFNER_DATA_DIR.mkdir(exist_ok=True, parents=True)

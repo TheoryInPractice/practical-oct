@@ -81,10 +81,6 @@ def convert_huffner():
     ))
     print('Identified {} Huffner files'.format(len(data_names)))
 
-    # Remove the old statistics CSV
-    if Path(preprocessed_dir / 'summary' / 'huffner.csv').is_file():
-        Path(preprocessed_dir / 'summary' / 'huffner.csv').unlink()
-
     # Convert datasets
     for dataset in data_names:
         print('Processing', dataset)
@@ -139,10 +135,6 @@ def convert_beasley():
     # Identify the Huffner data
     data_names = sorted(names_in_dir(original_dir / 'beasley', '.txt'))
     print('Identified {} Beasley files'.format(len(data_names)))
-
-    # Remove the old statistics CSV
-    if Path(preprocessed_dir / 'summary' / 'beasley.csv').is_file():
-        Path(preprocessed_dir / 'summary' / 'beasley.csv').unlink()
 
     # Convert datasets
     for dataset in data_names:
@@ -253,10 +245,6 @@ def convert_gka():
     # Identify the Huffner data
     data_names = sorted(names_in_dir(original_dir / 'gka', '.txt'))
     print('Identified {} GKA files'.format(len(data_names)))
-
-    # Remove the old statistics CSV
-    if Path(preprocessed_dir / 'summary' / 'gka.csv').is_file():
-        Path(preprocessed_dir / 'summary' / 'gka.csv').unlink()
 
     # Convert datasets
     for dataset in data_names:
