@@ -6,7 +6,8 @@ from experiments import (
     headers,
     PREPROCESSING_TIMEOUTS,
     PRINT_CONTEXT,
-    GROUND_TRUTH_DATA_FILE
+    GROUND_TRUTH_DATA_FILE,
+    TABLES_DIR
 )
 from experiments.heuristic import (
     COMBINED_RESULTS_DATA_FILE,
@@ -156,7 +157,7 @@ def main():
         (HEURISTICS_SOLVER, HUFFNER_P2, CPLEX_SOLVER)
     ]
 
-    with open('paper/tables/heuristic1.tex', 'w') as outfile:
+    with open(str(TABLES_DIR / 'heuristic1.tex'), 'w') as outfile:
         write_latex_header(outfile, solver_headers)
         write_dataset_header(outfile, 'Wernicke-\\huffner Afro-American Graphs')
         write_dataset(outfile, aa_datasets, timeouts, solvers, df, opt_df)
@@ -164,7 +165,7 @@ def main():
         write_dataset(outfile, j_datasets, timeouts, solvers, df, opt_df)
         write_latex_footer(outfile)
 
-    with open('paper/tables/heuristic2.tex', 'w') as outfile:
+    with open(str(TABLES_DIR / 'heuristic2.tex'), 'w') as outfile:
         write_latex_header(outfile, solver_headers)
         write_dataset_header(outfile, 'Beasley 50-Vertex Graphs')
         write_dataset(outfile, b50_datasets, timeouts, solvers, df, opt_df)
