@@ -7,7 +7,7 @@ seconds. We use the version of Huffner
 with heuristic preprocessing and density
 sorting.
 
-All data is logged to results/huffner_heuristics.csv
+All data is logged to results/ic_heuristics.csv
 """
 
 

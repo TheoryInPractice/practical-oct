@@ -9,7 +9,7 @@ CPLEX_RESULTS_DATA_FILE = RESULTS_DIR / 'cplex_experiment_results.csv'
 HEURISTICS_RESULTS_DATA_FILE = (
     RESULTS_DIR / 'heuristics_experiment_results.csv'
 )
-HUFFNER_RESULTS_DATA_FILE = RESULTS_DIR / 'huffner_heuristics.csv'
+HUFFNER_RESULTS_DATA_FILE = RESULTS_DIR / 'ic_heuristics.csv'
 HUFFNER_P1 = 'IC_1'
 HUFFNER_P2 = 'IC_2'
 LT_HUFFNER_P1 = r'$\textsf{IC}^+_{1}$'

@@ -8,14 +8,14 @@ with 50 unique seeds.
 The timeout used will be the largest timeout in [0.01, 0.1, 1, 10]
 seconds less than the time Huffner with no preprocessing took
 to find an exact solution. This information is pulled from
-paper_results/huffner_baseline_experiment_results.csv, which
+paper_results/ic_baseline_experiment_results.csv, which
 was computed by huffner_baseline.py. Any dataset not present
 in this dataset timed out, so its runtime was > 10 minutes.
 Any dataset reported as solved in less than the smallest timeout
 will be run with the smallest timeout.
 
 All results of this experiment are saved to the data file
-results/huffner_self_comparison.csv
+results/ic_preprocessing_level.csv
 """
 
 
