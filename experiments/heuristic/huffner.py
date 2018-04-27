@@ -58,7 +58,7 @@ def main():
             )
 
             # Determine preprocessing level and solver name
-            if timeout <= 0.01:
+            if timeout <= 0.1:
                 preprocessing = PREPROCESSING_ENSEMBLE
                 solver = HUFFNER_P1
             else:
