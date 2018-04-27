@@ -26,7 +26,6 @@ from experiments.exact import EXACT_RESULTS_DATA_PATH
 from experiments.heuristic import COMBINED_RESULTS_DATA_FILE
 from experiments.ic import SELF_COMPARISON_DATA_PATH, BASELINE_FILE
 from experiments.ilp import ILP_RESULTS_FILE_PATH
-from experiments.internal.huffner_heuristics_time_experiment import DATAFILE
 from src.preprocessing.graphs import (
     read_beasley, read_huffner,
     convert_oct_set, load_pre_oct_set,
@@ -46,8 +45,7 @@ RESULTS_FILENAMES = [
     EXACT_RESULTS_DATA_PATH,
     ILP_RESULTS_FILE_PATH,
     BASELINE_FILE,
-    SELF_COMPARISON_DATA_PATH,
-    DATAFILE
+    SELF_COMPARISON_DATA_PATH
 ]
 RESULTS_HEADERS = [
     headers.SOLVER, headers.DATASET, headers.RESULTS_FILE, headers.CERTIFICATE
