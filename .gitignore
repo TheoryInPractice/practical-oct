@@ -1,54 +1,25 @@
-# virtualenv
-env3
-
 # OS Files
 .DS_Store
 
-# Vagrant Files
-.vagrant/
-ubuntu-xenial-*.log
-
-# Ansile Files
-*.retry
 
 # Python Files
 __pycache__/
 *.pyc
+.ropeproject
 
-# C files
-callgrind.*
-
-# Java Files
-*.class
 
 # External sources
-src/akiba-iwata-src
 src/huffner-src
+src/akiba-iwata-src
+*.class
+
 
 # OCT Files
-build/
+env/
 data/
-vertex_cover/
-*.so
-*_wrap.cxx
-tuning_oct.py
 heuristic_solver
 *.dSYM/
 *.ignore
 cplex.log
-ilp_figures.pdf
-env/
 experiments/plots/
 experiments/results/
-
-# Atom files
-.ropeproject
-
-# Paper files
-paper/*.aux
-paper/*.bbl
-paper/*.blg
-paper/*.log
-paper/*.out
-paper/*.vtc
-paper/Paper.pdf
