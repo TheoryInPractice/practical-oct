@@ -3,6 +3,7 @@
 
 # Imports
 from experiments import (
+    headers,
     logger,
     EXACT_TIMEOUT,
     HUFFNER_DATA_DIR,
@@ -13,6 +14,10 @@ from experiments.datasets import huffner_experiment_datasets
 from src.huffner.solver import solve
 import csv
 import subprocess
+
+
+# Constants
+HUFFNER_BASELINE_SOLVER = 'huffner_baseline'
 
 
 def main():
@@ -26,7 +31,8 @@ def main():
 
         # Write header
         writer.writerow([
-            'Dataset', 'Time', 'Size', 'Certificate'
+            headers.DATASET, headers.SOLVER,
+            headers.TIME, headers.SIZE, headers.CERTIFICATE
         ])
 
         # Run experiments
@@ -48,6 +54,7 @@ def main():
 
             writer.writerow([
                 dataset,
+                HUFFNER_BASELINE_SOLVER,
                 *solution
             ])
             output.flush()
