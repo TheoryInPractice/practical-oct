@@ -1,5 +1,7 @@
 <img align="right" src="logo.svg">
+
 # Practical OCT
+
 (*Image credit: Felix Reidl*)
 
 ## Environment Configuration
