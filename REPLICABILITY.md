@@ -247,7 +247,11 @@ To generate ILP figures, run
 python -m experiments.ilp.plot
 ```
 
-## Preprocessing
+## Data 
+
+Datasets are automatically downloaded and sanitized using the `data` target of the Makefile. 
+
+## Reductions
 
 ### Run
 
