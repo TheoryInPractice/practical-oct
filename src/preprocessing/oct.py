@@ -261,8 +261,11 @@ def reduction_rule_5(graph, oct_set):
             continue
 
         # If the path is more than the initial node, reduce such that
-        # parity is maintained.
-        if len(path) > 1:
+        # parity is maintained. Note that the path must be odd or must be even
+        # and its endpoints are not adjacent
+        if len(path) > 1 and \
+            ((len(path) % 1) == 1 or
+             (not graph.has_edge(left_endpoint, right_endpoint))):
             changed = True
             # Update the preprocessing statistics
             graph.graph['vertices_removed'] += len(path)
