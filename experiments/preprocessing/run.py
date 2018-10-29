@@ -1,3 +1,7 @@
+"""
+Runs reduction rules to generate data/preprocessed/ from data/converted/
+"""
+
 import networkx as nx
 from pathlib import Path
 import subprocess
@@ -5,10 +9,16 @@ import time
 
 from experiments import PREPROCESSED_DATA_DIR
 from src.preprocessing.graphs import (
-    read_beasley, read_huffner, read_edgelist,
-    write_edgelist, write_huffner, write_snap,
-    open_path, reset_labels, names_in_dir,
-    convert_oct_set, load_pre_oct_set,
+    read_beasley,
+    read_huffner,
+    write_edgelist,
+    write_huffner,
+    write_snap,
+    open_path,
+    reset_labels,
+    names_in_dir,
+    convert_oct_set,
+    load_pre_oct_set,
     load_og_name_lookup
 )
 from src.preprocessing.oct import oct_reductions
@@ -466,11 +476,6 @@ if __name__ == '__main__':
     """
     Assumes that the experiment is called from the root directory.
     """
-
-    huffner_data = sorted([x.replace('.graph', '') for x in names_in_dir(
-        Path('.') / 'data' / 'original' / 'huffner', extension='.graph')])
-    beasley_data = ['bqp50_{}'.format(i) for i in range(1, 11)] + ['bqp100_{}'.format(i) for i in range(1, 11)]
-    gka_data = ['gka_{}'.format(i) for i in range(1, 36)]
 
     # Write summary file headers
     summry_dir = PREPROCESSED_DATA_DIR / 'summary'

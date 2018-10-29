@@ -1,22 +1,19 @@
 # OS Files
 .DS_Store
 
-
 # Python Files
 __pycache__/
 *.pyc
 .ropeproject
-
 
 # External sources
 src/huffner-src
 src/akiba-iwata-src
 *.class
 
-
 # OCT Files
 env/
-data/
+/data
 heuristic_solver
 *.dSYM/
 *.ignore
@@ -24,3 +21,6 @@ cplex.log
 figures/
 tables
 results/
+
+# Data
+experiments/data/synthetic_summary.csv

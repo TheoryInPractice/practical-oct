@@ -135,6 +135,13 @@ def _decompress_all():
     _decompress(GKA_DATA_DIR / GKA_FILE_NAME)
 
 
+def _remove_empty_huffner():
+    """Removes Huffner graphs known to be empty"""
+    (Path('.') / 'data' / 'original' / 'huffner' / 'aa12.graph').unlink()
+    (Path('.') / 'data' / 'original' / 'huffner' / 'j12.graph').unlink()
+    (Path('.') / 'data' / 'original' / 'huffner' / 'j27.graph').unlink()
+
+
 def main():
     """Download and place data into the data dir."""
 
@@ -146,6 +153,9 @@ def main():
     _download_beasley()
     _download_gka()
     _decompress_all()
+
+    # Remove bad files
+    _remove_empty_huffner()
 
     # Delete temp directory
     if TMP_DIR.exists():
