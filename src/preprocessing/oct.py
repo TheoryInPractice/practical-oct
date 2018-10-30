@@ -215,7 +215,6 @@ def reduction_rule_5(graph, oct_set):
         # left_endpoint-right_endpoint (if even) or
         # left_endpoint-root_node-right_endpoint (if odd)
         root_node = degree_two_nodes.pop()
-        # # print("Root is", root_node)
         left_endpoint, right_endpoint = graph.neighbors(root_node)
         path.clear()
         path.add(root_node)
@@ -234,13 +233,13 @@ def reduction_rule_5(graph, oct_set):
             # Pick the new neighbor. This filter works because there will be
             # exactly one neighbor not equal to last_node.
             next_node = list(filter(lambda neighbor: neighbor != last_node,
-                               graph.neighbors(left_endpoint)))[0]
+                                    graph.neighbors(left_endpoint)))[0]
             last_node = left_endpoint
             left_endpoint = next_node
 
         # Grow the path in the "right" direction. Similar to above.
         last_node = root_node
-        while (graph.degree(right_endpoint) == 2 and \
+        while (graph.degree(right_endpoint) == 2 and
                right_endpoint not in path):
             # while loop order is important: We don't want to do these steps if
             # right_endpoint has degree > 2.
@@ -250,7 +249,7 @@ def reduction_rule_5(graph, oct_set):
             # Pick the new neighbor. This filter works because there will be
             # exactly one neighbor not equal to last_node.
             next_node = list(filter(lambda neighbor: neighbor != last_node,
-                               graph.neighbors(right_endpoint)))[0]
+                                    graph.neighbors(right_endpoint)))[0]
             last_node = right_endpoint
             right_endpoint = next_node
 
@@ -262,8 +261,9 @@ def reduction_rule_5(graph, oct_set):
 
         # If the path is more than the initial node, reduce such that
         # parity is maintained. Note that the path must be odd or must be even
-        # and its endpoints are not adjacent
-        if len(path) > 1 and \
+        # and its endpoints are not adjacent. Also make sure the endpoints are
+        # not the same.
+        if len(path) > 1 and left_endpoint != right_endpoint and \
             ((len(path) % 1) == 1 or
              (not graph.has_edge(left_endpoint, right_endpoint))):
             changed = True
