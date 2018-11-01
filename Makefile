@@ -24,7 +24,7 @@ data: virtualenv
 	source $(ENV_DIR)/bin/activate && python -m src.data
 
 huffner:
-	test -e $(HUFFNER_DIR) || git clone https://github.com/tdgoodrich/modernized_huffner.git $(HUFFNER_DIR)
+	test -e $(HUFFNER_DIR) || git clone https://github.com/tdgoodrich/occ_cpp.git $(HUFFNER_DIR)
 	(cd $(HUFFNER_DIR) && git pull -f origin master && git checkout $(HUFFNER_VERSION))
 	(cd $(HUFFNER_DIR) && make clean && make)
 

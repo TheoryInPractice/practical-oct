@@ -165,5 +165,6 @@ if __name__ == '__main__':
     datasets = names_in_dir(input_dir, '.edgelist')
     # Quantum data has no dashes, synthetics use dashes to separate parameters
     datasets = sorted(list(filter(lambda x: '-' in x, datasets)))
+    # datasets = ['aa25-er-14.edgelist']
     print('Preprocessing {} datasets'.format(len(datasets)))
     _convert_synthetic(datasets)

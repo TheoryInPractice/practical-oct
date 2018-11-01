@@ -15,7 +15,7 @@ import subprocess
 
 
 # Data sources
-HUFFNER_SRC = 'https://github.com/tdgoodrich/modernized_huffner.git'
+HUFFNER_SRC = 'https://github.com/tdgoodrich/occ_cpp.git'
 BEASLEY_SRC = 'http://people.brunel.ac.uk/~mastjjb/jeb/orlib/files'
 BQP_FILES = [
     'bqp50.txt',
