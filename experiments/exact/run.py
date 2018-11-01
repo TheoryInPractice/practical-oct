@@ -2,6 +2,7 @@
 
 
 # Imports
+from src.preprocessing.graphs import names_in_dir
 from experiments import (
     headers,
     logger,
@@ -12,7 +13,6 @@ from experiments import (
     EXACT_TIMEOUT,
     GROUND_TRUTH_DATA_FILE
 )
-from experiments.datasets import preprocessed as DATASETS
 from experiments.exact import (
     AI,
     IC,
@@ -29,6 +29,8 @@ import csv
 import pandas
 import subprocess
 import sys
+from pathlib import Path
+import argparse
 
 
 def _run_ilp(dataset, threads=4):
@@ -87,27 +89,34 @@ def _generate_ground_truth():
     exact.to_csv(str(GROUND_TRUTH_DATA_FILE), index=False)
 
 
-def main():
+def main(current_server_id, total_servers):
     """Run experiment."""
 
-    # Create dictionary of solvers
+    # Find the datasets we want
+    input_dir = Path('.') / 'data' / 'preprocessed' / 'edgelist'
+    datasets = names_in_dir(input_dir, '.edgelist')
+    # Quantum data has no dashes, synthetics use dashes to separate parameters
+    datasets = sorted(list(filter(lambda x: '-0' in x, datasets)))
+    datasets = [dataset.replace('.edgelist', '') for dataset in datasets]
+    total_datasets = len(datasets)
+
+    # Select a subset for this server
+    lower_limit = (current_server_id - 1) * len(datasets) // total_servers
+    upper_limit = current_server_id * len(datasets) // total_servers
+    datasets = datasets[lower_limit:upper_limit]
+    print('Server {} of {}, running datasets {} through {} of {}'.format(current_server_id, total_servers, lower_limit, upper_limit-1, total_datasets))
+
+    # Collect solvers
     solvers_dict = {
         AI: _run_ai,
         ILP: _run_ilp,
         ILP1T: partial(_run_ilp, threads=1),
         IC: _run_ic
     }
-
-    # Get solvers
-    argv = sys.argv[1:]
-    if len(argv) == 1 and argv[0] in solvers_dict:
-        name = argv[0]
-        solvers = [(name, solvers_dict[name])]
-    else:
-        solvers = list(solvers_dict.items())
+    solvers = sorted(list(solvers_dict.items()))
 
     # Generate experiments
-    experiments = product(DATASETS, solvers)
+    experiments = product(datasets, solvers)
 
     # Open output file for writing
     with open(str(EXACT_RESULTS_DATA_PATH), 'w') as output:
@@ -149,4 +158,9 @@ def main():
 
 # Invoke main
 if __name__ == '__main__':
-    main()
+    # Obtain the server number needed to split the data
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('-server', type=int, help='Current server number between 1 and total number of servers')
+    parser.add_argument('-of', type=int, help='Total number of servers')
+    args = parser.parse_args()
+    main(args.server, args.of)
