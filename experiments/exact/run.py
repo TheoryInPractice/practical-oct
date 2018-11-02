@@ -89,22 +89,18 @@ def _generate_ground_truth():
     exact.to_csv(str(GROUND_TRUTH_DATA_FILE), index=False)
 
 
-def main(current_server_id, total_servers):
+def main(current_server_id, total_servers, seed_filter):
     """Run experiment."""
 
     # Find the datasets we want
     input_dir = Path('.') / 'data' / 'preprocessed' / 'edgelist'
     datasets = names_in_dir(input_dir, '.edgelist')
-    # Quantum data has no dashes, synthetics use dashes to separate parameters
-    datasets = sorted(list(filter(lambda x: '-0' in x, datasets)))
     datasets = [dataset.replace('.edgelist', '') for dataset in datasets]
-    total_datasets = len(datasets)
-
-    # Select a subset for this server
-    lower_limit = (current_server_id - 1) * len(datasets) // total_servers
-    upper_limit = current_server_id * len(datasets) // total_servers
-    datasets = datasets[lower_limit:upper_limit]
-    print('Server {} of {}, running datasets {} through {} of {}'.format(current_server_id, total_servers, lower_limit, upper_limit-1, total_datasets))
+    datasets = sorted(datasets)
+    # Quantum data has no dashes, synthetics use dashes to separate parameters
+    datasets = list(filter(seed_filter, datasets))
+    dataset_partition = datasets[current_server_id-1::total_servers]
+    print(dataset_partition)
 
     # Collect solvers
     solvers_dict = {
@@ -116,7 +112,7 @@ def main(current_server_id, total_servers):
     solvers = sorted(list(solvers_dict.items()))
 
     # Generate experiments
-    experiments = product(datasets, solvers)
+    experiments = product(dataset_partition, solvers)
 
     # Open output file for writing
     with open(str(EXACT_RESULTS_DATA_PATH), 'w') as output:
@@ -160,7 +156,15 @@ def main(current_server_id, total_servers):
 if __name__ == '__main__':
     # Obtain the server number needed to split the data
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('-server', type=int, help='Current server number between 1 and total number of servers')
-    parser.add_argument('-of', type=int, help='Total number of servers')
+    parser.add_argument(
+        '-server',
+        type=int,
+        required=True,
+        help='Current server number between 1 and total number of servers')
+    parser.add_argument(
+        '-of',
+        type=int,
+        required=True,
+        help='Total number of servers')
     args = parser.parse_args()
-    main(args.server, args.of)
+    main(args.server, args.of, lambda x: x.endswith('-1') or x.endswith('-2'))
