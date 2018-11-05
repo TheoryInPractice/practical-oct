@@ -32,6 +32,7 @@ def solve(filename, timeout=None, preprocessing=0, seed=0, htime=0.25):
     start = time.time()
 
     # Create Huffner subprocess
+    print('Calling {} -p {} -s {} -t {} -f {}'.format(huffner, str(preprocessing), str(seed), str(int(htime * 1000)), filename))
     proc = subprocess.Popen(
         [
             huffner,
