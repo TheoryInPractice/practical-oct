@@ -190,7 +190,6 @@ def _execute_iterative_compression(datasets):
             )
 
             # Determine preprocessing level and solver name
-            solver = HUFFNER_P1
             if timeout <= 0.1:
                 preprocessing = PREPROCESSING_ENSEMBLE
                 solver = HUFFNER_P1
@@ -199,7 +198,7 @@ def _execute_iterative_compression(datasets):
                 solver = HUFFNER_P2
 
             # Solve
-            solution = solver(
+            solution = solve_ic(
                 str(HUFFNER_DATA_DIR / (dataset + HUFFNER_DATA_EXT)),
                 timeout=timeout,
                 preprocessing=preprocessing,
