@@ -259,7 +259,7 @@ if __name__ == '__main__':
     datasets = sorted(datasets)
     # Quantum data has no dashes, synthetics use dashes to separate parameters
     datasets = list(filter(seed_filter, datasets))
-    datasets = ['aa10-ba-1', 'aa11-er-8', 'aa11-ba-13']
+    # datasets = ['aa10-ba-1', 'aa11-er-8', 'aa11-ba-13']
 
     # Execute experiments
     # _execute_cplex(datasets)
