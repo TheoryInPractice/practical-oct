@@ -88,11 +88,11 @@ def _execute_cplex(preprocessed):
                 )
 
                 # Run cplex
-                solution = solve(
+                solution = solve_ilp(
                     read_edgelist(experiment[1]),
                     formulation='VC',
                     solver='CPLEX',
-                    threads=4,
+                    threads=1,
                     timelimit=experiment[0],
                     convert_to_oct=True
                 )
