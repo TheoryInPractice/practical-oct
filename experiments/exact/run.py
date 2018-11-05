@@ -166,4 +166,6 @@ if __name__ == '__main__':
         required=True,
         help='Total number of servers')
     args = parser.parse_args()
-    main(args.server, args.of, lambda x: x.endswith('-3') or x.endswith('-4'))
+    main(args.server, args.of, lambda x: x.endswith('-0') or
+                                         x.endswith('-1') or
+                                         x.endswith('-2'))
