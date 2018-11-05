@@ -42,7 +42,7 @@ def solve(filename, timeout=None, convert_to_oct=False):
     ------
     subprocess.TimeoutExpired
         Raised if a timeout is specified and no solution is found
-        within the timelimit.
+        within the timelimit. The process is killed beforehand.
     """
 
     # Read first line of file to get number of vertices
@@ -60,7 +60,11 @@ def solve(filename, timeout=None, convert_to_oct=False):
     )
 
     # Wait with timeout for the process to finish and grab output.
-    stdout, stderr = proc.communicate(timeout=timeout)
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        raise
 
     # Get total time
     total_time = time.time() - start
