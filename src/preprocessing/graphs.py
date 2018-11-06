@@ -41,14 +41,17 @@ def init_stats(graph):
     return graph
 
 
-def names_in_dir(dir_name, extension='.txt'):
+def names_in_dir(dir_name, extension):
     """
-    Return a list of file names with a particular extension in a directory.
+    Return a sorted list of file names with a particular extension in a
+    directory. The extension is not included in the filenames, and files
+    starting with underscores are ignored.
     """
-
-    # Find all files in a directory that end with a particular extension
-    # and don't start with an underscore
+    # Find names using glob
     names = [x.name for x in dir_name.glob('[!_]*{}'.format(extension))]
+    # Clean up and return
+    names = [name.replace(extension, '') for name in names]
+    names = sorted(names)
     return names
 
 
