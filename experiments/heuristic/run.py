@@ -82,6 +82,7 @@ def _execute_heuristic_ensemble(configurations, outfile, csv_writer):
 
         # Parse results
         output_string = bytes.decode(proc.stdout, 'utf-8').strip()
+        print('HE output: {}'.format(output_string))
         match = re.match(
             r'(\d+),(\d+),"(\[((\d+)(,(\d+))*)?\])"',
             output_string
@@ -177,8 +178,6 @@ if __name__ == '__main__':
     # Ensure the command-line args are reasonable
     if args.server > args.of:
         raise ValueError('Unsupported server and total count configuration')
-    elif args.of > len(args.seeds):
-        print('Warning: Fewer seeds than total servers')
 
     # Find all datasets
     input_dir = Path('.') / 'data' / 'preprocessed' / 'edgelist'
@@ -187,7 +186,19 @@ if __name__ == '__main__':
     valid_suffixes = tuple(map(lambda x: '-{}'.format(x), args.seeds))
     datasets = sorted(list(filter(lambda x: x.endswith(valid_suffixes),
                                   datasets)))
+
+    # Filter out datasets of empty graphs
+    def nontrivial(filename):
+        with open(str(input_dir / filename) + '.edgelist', 'r') as infile:
+            topline = tuple(map(int, infile.readline().split()))
+            if topline == (0, 0):
+                return False
+            else:
+                return True
+    datasets = sorted(list(filter(nontrivial, datasets)))
+
     # Split data across servers
+    # datasets[1:20] + ['aa16-ba-20'] # For testing purposes, reduce the data
     datasets = datasets[args.server-1::args.of]
 
     # Define timeouts
@@ -197,7 +208,6 @@ if __name__ == '__main__':
     print(
         'Starting experiment with {} datasets and timeouts {}'
         .format(len(datasets), timeouts_in_seconds))
-    print(datasets)
 
     # Define header used in CSV output
     csv_header = [
@@ -209,35 +219,28 @@ if __name__ == '__main__':
         'Certificate'
     ]
 
-    # Execute the iterative compression solver
-    dir = Path('.') / 'data' / 'preprocessed' / 'huffner'
-    extension = '.huffner'
-    ic_data = [str(dir / dataset) + extension for dataset in datasets]
-    configurations = product(ic_data, timeouts_in_seconds)
-    outfile_path = Path('.') / 'results' / 'ic_heuristic_experiment.csv'
+    outfile_path = Path('.') / 'results' / 'heuristic_experiment.csv'
     with open(str(outfile_path), 'w') as outfile:
         csv_writer = csv.writer(outfile)
         csv_writer.writerow(csv_header)
+
+        # # Execute Heuristic Ensemble
+        # dir = Path('.') / 'data' / 'preprocessed' / 'edgelist'
+        # extension = '.edgelist'
+        # he_data = [str(dir / dataset) + extension for dataset in datasets]
+        # configurations = product(he_data, timeouts_in_milliseconds)
+        # _execute_heuristic_ensemble(configurations, outfile, csv_writer)
+
+        # Execute the iterative compression solver
+        dir = Path('.') / 'data' / 'preprocessed' / 'huffner'
+        extension = '.huffner'
+        ic_data = [str(dir / dataset) + extension for dataset in datasets]
+        configurations = product(ic_data, timeouts_in_seconds)
         _execute_iterative_compression(configurations, outfile, csv_writer)
 
-    # Execute CPLEX
-    dir = Path('.') / 'data' / 'preprocessed' / 'snap'
-    extension = '.snap'
-    cplex_data = [str(dir / dataset) + extension for dataset in datasets]
-    configurations = product(cplex_data, timeouts_in_seconds)
-    outfile_path = Path('.') / 'results' / 'ilp_heuristic_experiment.csv'
-    with open(str(outfile_path), 'w') as outfile:
-        csv_writer = csv.writer(outfile)
-        csv_writer.writerow(csv_header)
-        _execute_cplex(configurations, outfile, csv_writer)
-
-    # Execute Heuristic Ensemble
-    dir = Path('.') / 'data' / 'preprocessed' / 'edgelist'
-    extension = '.edgelist'
-    he_data = [str(dir / dataset) + extension for dataset in datasets]
-    configurations = product(he_data, timeouts_in_milliseconds)
-    outfile_path = Path('.') / 'results' / 'he_heiristic_experiment.csv'
-    with open(str(outfile_path), 'w') as outfile:
-        csv_writer = csv.writer(outfile)
-        csv_writer.writerow(csv_header)
-        _execute_heuristic_ensemble(configurations, outfile, csv_writer)
+        # # Execute CPLEX
+        # dir = Path('.') / 'data' / 'preprocessed' / 'snap'
+        # extension = '.snap'
+        # cplex_data = [str(dir / dataset) + extension for dataset in datasets]
+        # configurations = product(cplex_data, timeouts_in_seconds)
+        # _execute_cplex(configurations, outfile, csv_writer)
