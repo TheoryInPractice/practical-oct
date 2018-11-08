@@ -224,12 +224,12 @@ if __name__ == '__main__':
         csv_writer = csv.writer(outfile)
         csv_writer.writerow(csv_header)
 
-        # # Execute Heuristic Ensemble
-        # dir = Path('.') / 'data' / 'preprocessed' / 'edgelist'
-        # extension = '.edgelist'
-        # he_data = [str(dir / dataset) + extension for dataset in datasets]
-        # configurations = product(he_data, timeouts_in_milliseconds)
-        # _execute_heuristic_ensemble(configurations, outfile, csv_writer)
+        # Execute Heuristic Ensemble
+        dir = Path('.') / 'data' / 'preprocessed' / 'edgelist'
+        extension = '.edgelist'
+        he_data = [str(dir / dataset) + extension for dataset in datasets]
+        configurations = product(he_data, timeouts_in_milliseconds)
+        _execute_heuristic_ensemble(configurations, outfile, csv_writer)
 
         # Execute the iterative compression solver
         dir = Path('.') / 'data' / 'preprocessed' / 'huffner'
@@ -238,9 +238,9 @@ if __name__ == '__main__':
         configurations = product(ic_data, timeouts_in_seconds)
         _execute_iterative_compression(configurations, outfile, csv_writer)
 
-        # # Execute CPLEX
-        # dir = Path('.') / 'data' / 'preprocessed' / 'snap'
-        # extension = '.snap'
-        # cplex_data = [str(dir / dataset) + extension for dataset in datasets]
-        # configurations = product(cplex_data, timeouts_in_seconds)
-        # _execute_cplex(configurations, outfile, csv_writer)
+        # Execute CPLEX
+        dir = Path('.') / 'data' / 'preprocessed' / 'snap'
+        extension = '.snap'
+        cplex_data = [str(dir / dataset) + extension for dataset in datasets]
+        configurations = product(cplex_data, timeouts_in_seconds)
+        _execute_cplex(configurations, outfile, csv_writer)
