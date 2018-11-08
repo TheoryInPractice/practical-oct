@@ -56,6 +56,15 @@ def _execute_cplex(configurations, outfile, csv_writer):
             outfile.flush()
 
         except Exception as e:
+            csv_writer.writerow([
+                dataset.split('/')[-1].replace('.snap', ''),
+                'ilp_1',
+                timeout,
+                float('nan'),
+                float('nan'),
+                float('nan')
+            ])
+            outfile.flush()
             logger.error(e)
 
 
@@ -68,39 +77,51 @@ def _execute_heuristic_ensemble(configurations, outfile, csv_writer):
 
     # Execute all configurations
     for (dataset, timeout) in configurations:
-        logger.info(
-            'Executing HE on {} with timeout {}ms'.format(dataset, timeout)
-        )
+        try:
+            logger.info(
+                'Executing HE on {} with timeout {}ms'.format(dataset, timeout)
+            )
 
-        # Execute configuration
-        solver = str(Path('.') / 'src' / 'heuristics' / 'heuristic_solver')
-        proc = subprocess.run(
-            [solver, timeout, dataset],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
+            # Execute configuration
+            solver = str(Path('.') / 'src' / 'heuristics' / 'heuristic_solver')
+            proc = subprocess.run(
+                [solver, timeout, dataset],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
 
-        # Parse results
-        output_string = bytes.decode(proc.stdout, 'utf-8').strip()
-        print('HE output: {}'.format(output_string))
-        match = re.match(
-            r'(\d+),(\d+),"(\[((\d+)(,(\d+))*)?\])"',
-            output_string
-        )
-        size = int(match.group(1))
-        time = int(match.group(2))
-        certificate = match.group(3)
+            # Parse results
+            output_string = bytes.decode(proc.stdout, 'utf-8').strip()
+            print('HE output: {}'.format(output_string))
+            match = re.match(
+                r'(\d+),(\d+),"(\[((\d+)(,(\d+))*)?\])"',
+                output_string
+            )
+            size = int(match.group(1))
+            time = int(match.group(2))
+            certificate = match.group(3)
 
-        # Write results
-        csv_writer.writerow([
-            dataset.split('/')[-1].replace('.edgelist', ''),
-            'he',
-            timeout,
-            time,
-            size,
-            certificate
-        ])
-        outfile.flush()
+            # Write results
+            csv_writer.writerow([
+                dataset.split('/')[-1].replace('.edgelist', ''),
+                'he',
+                timeout,
+                time,
+                size,
+                certificate
+            ])
+            outfile.flush()
+        except Exception as e:
+            csv_writer.writerow([
+                dataset.split('/')[-1].replace('.edgelist', ''),
+                'he',
+                timeout,
+                float('nan'),
+                float('nan'),
+                float('nan')
+            ])
+            outfile.flush()
+            logger.error(e)
 
 
 def _execute_iterative_compression(configurations, outfile, csv_writer):
@@ -111,34 +132,46 @@ def _execute_iterative_compression(configurations, outfile, csv_writer):
     logger.info('Starting Iterative Compression Heuristic Experiment')
     # Run all combinations of dataset and timeouts
     for (dataset, timeout) in configurations:
-        logger.info(
-            'Executing IC on {} with timeout {}s'.format(dataset, timeout)
-        )
+        try:
+            logger.info(
+                'Executing IC on {} with timeout {}s'.format(dataset, timeout)
+            )
 
-        # Determine preprocessing level and solver name
-        if timeout <= 0.1:
-            preprocessing = 1
-        else:
-            preprocessing = 2
+            # Determine preprocessing level and solver name
+            if timeout <= 0.1:
+                preprocessing = 1
+            else:
+                preprocessing = 2
 
-        # Solve
-        time, size, certificate = solve_ic(
-            dataset,
-            timeout=timeout,
-            preprocessing=preprocessing,
-            htime=min(0.3 * timeout, 1)
-        )
+            # Solve
+            time, size, certificate = solve_ic(
+                dataset,
+                timeout=timeout,
+                preprocessing=preprocessing,
+                htime=min(0.3 * timeout, 1)
+            )
 
-        # Write output
-        csv_writer.writerow([
-            dataset.split('/')[-1].replace('.huffner', ''),
-            'ic',
-            timeout,
-            time,
-            size,
-            certificate
-        ])
-        outfile.flush()
+            # Write output
+            csv_writer.writerow([
+                dataset.split('/')[-1].replace('.huffner', ''),
+                'ic',
+                timeout,
+                time,
+                size,
+                certificate
+            ])
+            outfile.flush()
+        except Exception as e:
+            csv_writer.writerow([
+                dataset.split('/')[-1].replace('.huffner', ''),
+                'ic',
+                timeout,
+                float('nan'),
+                float('nan'),
+                float('nan')
+            ])
+            outfile.flush()
+            logger.error(e)
 
 
 def _init_args():

@@ -56,8 +56,7 @@ def solve(filename, timeout=None, preprocessing=0, seed=0, htime=0.25):
 
     # Error if process failed
     if proc.returncode:
-        return float('nan'), float('nan'), float('nan')
-        # raise Exception(stderr)
+        raise Exception(stderr)
 
     # Decode stdout
     stdout = bytes.decode(stdout, 'utf-8').strip().split('\n')
