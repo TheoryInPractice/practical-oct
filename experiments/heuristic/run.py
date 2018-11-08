@@ -92,7 +92,6 @@ def _execute_heuristic_ensemble(configurations, outfile, csv_writer):
 
             # Parse results
             output_string = bytes.decode(proc.stdout, 'utf-8').strip()
-            print('HE output: {}'.format(output_string))
             match = re.match(
                 r'(\d+),(\d+),"(\[((\d+)(,(\d+))*)?\])"',
                 output_string
@@ -231,7 +230,6 @@ if __name__ == '__main__':
     datasets = sorted(list(filter(nontrivial, datasets)))
 
     # Split data across servers
-    # datasets[1:20] + ['aa16-ba-20'] # For testing purposes, reduce the data
     datasets = datasets[args.server-1::args.of]
 
     # Define timeouts
