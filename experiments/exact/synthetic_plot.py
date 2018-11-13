@@ -1,6 +1,10 @@
+from matplotlib.patches import Patch
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+
+
+ALPHA = .8
 
 
 def _get_dataset(name):
@@ -92,15 +96,44 @@ def _plot_vc_vs_ilp1t(exact_data_filename, output_filename, palette):
         hue_order=generator_order,
         s=60,
         palette=palette,
-        alpha=0.6,
+        alpha=ALPHA,
         linewidth=0,
+        legend=False,  # We generate the legend manually
+    )
+
+    # Add legend
+    legend_colors = zip(generator_order, palette)
+    ax.add_legend(
+        title='Generator',
+        legend_data={
+            name: Patch(color=color)
+            for name, color in legend_colors
+        },
+        label_order=generator_order,
+        bbox_to_anchor=(
+            0.833,  # Halfway through the third column (5/6)
+            0.75,   # Halfway through the top row (3/4)
+            0,
+            0
+        ),
     )
 
     # Adjust as needed
     ax.set(yscale="log", ylim=(0.01, 1000), xlim=(-3, 100))
-    for axis in ax.fig.get_axes():
+
+    for axis in ax.fig.axes:
         axis.set_title(dataset_order.pop())
         axis.axhline(y=1, color='black', dashes=[3, 3])
+
+    # Give the lonely plot some friends (move to bottom row next to last plot).
+    lone_plot = ax.fig.axes[2]
+    pos = lone_plot.get_position()
+    lone_plot.set_position([
+        pos.x0,
+        ax.fig.axes[4].get_position().y0,
+        pos.width,
+        pos.height
+    ])
 
     # Save to file
     ax.savefig(output_filename)
@@ -130,8 +163,26 @@ def _plot_ilp1t_vs_ilp(exact_data_filename, output_filename, palette):
         hue_order=generator_order,
         s=60,
         palette=palette,
-        alpha=0.6,
+        alpha=ALPHA,
         linewidth=0,
+        legend=False,
+    )
+
+    # Add legend
+    legend_colors = zip(generator_order, palette)
+    ax.add_legend(
+        title='Generator',
+        legend_data={
+            name: Patch(color=color)
+            for name, color in legend_colors
+        },
+        label_order=generator_order,
+        bbox_to_anchor=(
+            0.833,  # Halfway through the third column (5/6)
+            0.75,   # Halfway through the top row (1/4)
+            0,
+            0
+        ),
     )
 
     # Adjust as needed
@@ -140,6 +191,17 @@ def _plot_ilp1t_vs_ilp(exact_data_filename, output_filename, palette):
         axis.set_title(dataset_order.pop())
         axis.axhline(y=1, color='black', dashes=[3, 3])
         axis.axhline(y=0.1, color='red', dashes=[2, 2])
+        axis.axhline(y=4, color='blue', dashes=[5, 5])
+
+    # Give the lonely plot some friends (move to bottom row next to last plot).
+    lone_plot = ax.fig.axes[2]
+    pos = lone_plot.get_position()
+    lone_plot.set_position([
+        pos.x0,
+        ax.fig.axes[4].get_position().y0,
+        pos.width,
+        pos.height
+    ])
 
     # Save to file
     ax.savefig(output_filename)
