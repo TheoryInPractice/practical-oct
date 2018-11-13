@@ -1,10 +1,14 @@
 # OS Files
 .DS_Store
 
+# IDE Files
+.idea/
+.ropeproject/
+*.iml
+
 # Python Files
 __pycache__/
 *.pyc
-.ropeproject
 
 # External sources
 src/huffner-src
