@@ -103,10 +103,10 @@ def main(current_server_id, total_servers, seed_filter):
 
     # Collect solvers
     solvers_dict = {
-        AI: _run_ai,
+        # AI: _run_ai,
         ILP: _run_ilp,
-        ILP1T: partial(_run_ilp, threads=1),
-        IC: _run_ic
+        # ILP1T: partial(_run_ilp, threads=1),
+        # IC: _run_ic
     }
     solvers = sorted(list(solvers_dict.items()))
 
@@ -166,5 +166,5 @@ if __name__ == '__main__':
         required=True,
         help='Total number of servers')
     args = parser.parse_args()
-    main(args.server, args.of, lambda x: x.endswith('-3') or
-                                         x.endswith('-4'))
+    main(args.server, args.of,
+         lambda x: x.endswith(['-{}'.format(x) for x in range(5, 15)]))
