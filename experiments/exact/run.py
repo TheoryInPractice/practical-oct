@@ -167,4 +167,4 @@ if __name__ == '__main__':
         help='Total number of servers')
     args = parser.parse_args()
     main(args.server, args.of,
-         lambda x: x.endswith(['-{}'.format(x) for x in range(5, 15)]))
+         lambda x: x.endswith(tuple(['-{}'.format(x) for x in range(5, 15)])))
