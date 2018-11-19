@@ -99,7 +99,9 @@ def main(current_server_id, total_servers, seed_filter):
     datasets = sorted(datasets)
     # Quantum data has no dashes, synthetics use dashes to separate parameters
     datasets = list(filter(seed_filter, datasets))
-    dataset_partition = datasets[current_server_id-1::total_servers]
+    # Split "-server 3 -of 3" across 3 servers
+    dataset_partition = datasets[2::total_servers]
+    dataset_partition = dataset_partition[current_server_id-1::total_servers]
 
     # Collect solvers
     solvers_dict = {
