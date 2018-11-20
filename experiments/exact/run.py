@@ -103,6 +103,7 @@ def main(current_server_id, total_servers, seed_filter):
     dataset_partition = datasets[2::total_servers]
     dataset_partition = dataset_partition[current_server_id-1::total_servers]
 
+    print('Expected data:', dataset_partition)
     # Collect solvers
     solvers_dict = {
         # AI: _run_ai,
