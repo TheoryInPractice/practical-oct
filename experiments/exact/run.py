@@ -101,7 +101,7 @@ def main(current_server_id, total_servers, seed_filter):
     datasets = list(filter(seed_filter, datasets))
     # Split "-server 3 -of 3" across 3 servers
     dataset_partition = datasets[2::total_servers]
-    dataset_partition = dataset_partition[current_server_id-1::total_servers]
+    dataset_partition = dataset_partition[current_server_id-1::total_servers][69:]
 
     print('Expected data:', dataset_partition)
     # Collect solvers
