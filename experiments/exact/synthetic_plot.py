@@ -17,9 +17,9 @@ FORMATTED_GKA = r'\texttt{GKA}'
 
 # Formatted generator names
 FORMATTED_ER = r'Erd\"os-R\'enyi'
-FORMATTED_TO = r'Chung-Lu'
-FORMATTED_CL = r'Barab\'asi-Albert'
-FORMATTED_BA = r'Tunable-OCT'
+FORMATTED_CL = r'Chung-Lu'
+FORMATTED_BA = r'Barab\'asi-Albert'
+FORMATTED_TO = r'Tunable-OCT'
 
 
 def _get_dataset(name):
@@ -49,9 +49,9 @@ def _get_generator(name):
 def _get_dataset_order():
     return [FORMATTED_AA,
             FORMATTED_J,
+            FORMATTED_GKA,
             FORMATTED_B_50,
-            FORMATTED_B_100,
-            FORMATTED_GKA]
+            FORMATTED_B_100]
 
 
 def _get_generator_order():
@@ -136,20 +136,24 @@ def _compute_plot(solver1, solver2, title, exact_data_filename,
         },
         label_order=_get_generator_order(),
         bbox_to_anchor=(
-            0.833,  # Halfway through the third column (5/6)
-            0.75,   # Halfway through the top row (3/4)
+            0.78,   # Percent of total width
+            0.72,   # Percent of total height
             0,
             0
         ),
     )
 
-    # Adjust as needed
-    ax.set(yscale="log", ylim=(0.01, 1000), xlim=(-3, 100))
+    # Modify titles
+    # Top title
+    plt.subplots_adjust(top=0.9)
+    ax.fig.suptitle(title)
 
-    dataset_order = _get_dataset_order()
-    for axis in ax.fig.axes:
-        axis.set_title(dataset_order.pop())
-        axis.axhline(y=1, color='black', dashes=[3, 3])
+    # Facet titles
+    ax.set_ylabels(r'\textbf{Run Time Ratio}')
+    ax.set_xlabels(r'\textbf{Minimum OCT}')
+
+    # Adjust scales
+    ax.set(yscale="log", ylim=(0.01, 1000), xlim=(-3, 100))
 
     # Give the lonely plot some friends (move to bottom row next to last plot).
     lone_plot = ax.fig.axes[2]
@@ -160,6 +164,12 @@ def _compute_plot(solver1, solver2, title, exact_data_filename,
         pos.width,
         pos.height
     ])
+
+    # Add facet titles and hlines
+    titles = _get_dataset_order()
+    for axis in ax.fig.axes:
+        axis.set_title(titles.pop(0))
+        axis.axhline(y=1, color='black', dashes=[3, 3])
 
     # Save to file
     ax.savefig(output_filename)
@@ -177,14 +187,14 @@ if __name__ == "__main__":
     # Generate plots
     _compute_plot(solver1='vc',
                   solver2='ilp_1t',
-                  title='Title',
+                  title=r'Relative Run Times of \textsf{VC} to \textsf{ILP}',
                   exact_data_filename='results/exact_results.csv',
                   output_filename='figures/figure2.pdf',
                   palette=palette)
     print('Generated VC vs ILP_1t (figure2)')
     _compute_plot(solver1='ilp_1t',
                   solver2='ilp',
-                  title='Title',
+                  title=r'Relative Run Times of 1-Thread \textsf{ILP} to 4-Thread \textsf{ILP}',
                   exact_data_filename='results/exact_results.csv',
                   output_filename='figures/figure3.pdf',
                   palette=palette)

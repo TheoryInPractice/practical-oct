@@ -13,7 +13,10 @@ OUTPUT = src/heuristics/heuristic_solver
 CPP_VERSION = -std=c++14
 COMPILE_OPTIONS = -Wall -g -O3 -pthread
 
-default: clean virtualenv heuristics akiba-iwata akiba-iwata-preprocessing huffner data
+default:
+	@echo "You're not in a paper dir"
+
+real_default: clean virtualenv heuristics akiba-iwata akiba-iwata-preprocessing huffner data
 
 clean:
 	rm -f $(OUTPUT)

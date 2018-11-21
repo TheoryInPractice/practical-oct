@@ -24,7 +24,6 @@ heuristic_solver
 cplex.log
 figures/
 tables
-results/
 
 # Data
 experiments/data/synthetic_summary.csv

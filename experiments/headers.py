@@ -2,7 +2,6 @@
 
 TIMEOUT = 'Timeout'
 DATASET = 'Dataset'
-BF_DATASET = '\\textbf{Dataset}'
 PREPROCESSING = 'Preprocessing'
 SIZE = 'Size'
 TIME = 'Time'
@@ -13,21 +12,35 @@ MEMORY = 'Memory'
 FORMULATION = 'Formulation'
 VERTICES = 'Vertices'
 VERTICES_REMOVED = 'vertices_removed'
-LT_VERTICES_REMOVED = '$|V_r|$'
-LT_NUM_VERTICES = '$|V|$'
-LT_VP = "$|V' \cup V_b|$"
 EDGES = 'Edges'
-LT_NUM_EDGES = '$|E|$'
-LT_PREPROCESSED_EDGES = "$|E'|$"
 EDGES_REMOVED = 'edges_removed'
-LT_EDGES_REMOVED = '$|E_r|$'
 OPT = 'Opt'
-LT_OPT = '$OPT$'
-LT_PREPROCESSED_OPT = "$OPT'$"
 HTIME = 'HTime'
 RESULTS_FILE = 'Results File'
 VALID = 'Is Valid Certificate'
 OCT = 'oct'
-LT_VERTICES_OCT = '$|V_o|$'
 BIPARTITE = 'bipartite'
+
+# Formatted names
+BF_DATASET = '\\textbf{Dataset}'
+LT_OPT = '$OPT$'
+LT_PREPROCESSED_OPT = "$OPT'$"
+LT_NUM_EDGES = '$|E|$'
+LT_PREPROCESSED_EDGES = "$|E'|$"
+LT_NUM_VERTICES = '$|V|$'
+LT_VP = "$|V' \cup V_b|$"
+
+LT_VERTICES_REMOVED = '$|V_r|$'
+LT_EDGES_REMOVED = '$|E_r|$'
+LT_VERTICES_OCT = '$|V_o|$'
 LT_VERTICES_BIPARTITE = '$|V_b|$'
+
+LT_VERTICES_REMOVED_NORM = '$|\widehat{V_r}|$'
+LT_EDGES_REMOVED_NORM = '$|\widehat{E_r}|$'
+LT_VERTICES_OCT_NORM = '$|\widehat{V_o}|$'
+LT_VERTICES_BIPARTITE_NORM = '$|\widehat{V_b}|$'
+
+DENSITY = '$|E|/|V|$'
+PREPROCESSED_DENSITY = "$|E|/|V' \cup V_b|$"
+
+DATASET_HEADERS = ['aa', 'j', 'gka', 'b-50', 'b-100']
