@@ -21,7 +21,7 @@ clean:
 	rm -rf $(ENV_DIR)
 
 data: virtualenv
-	source $(ENV_DIR)/bin/activate && python -m src.data
+	. $(ENV_DIR)/bin/activate && python -m src.data
 
 huffner:
 	test -e $(HUFFNER_DIR) || git clone https://github.com/tdgoodrich/occ_cpp.git $(HUFFNER_DIR)
