@@ -22,13 +22,12 @@ must be available. It is known to support the following language and build tool 
 
 To configure a development environment, first run `make`. The `Makefile` will
 
-* Build a new Python 3.5 virtual environment
+* Build a new Python 3.5 virtual environment (local copy of Python 3.5 required)
 * Download the source for external solvers used in experiments
-* Compile all C/C++ and Java source code
+* Compile all C/C++ and Java source code (clang and javac required)
 * Download and extract all original data files
 
-Afterwards, activate the virtual environment with `source env/bin/activate` and install the
-CPLEX bindings for Python with `python setup.py install`.
+The installed Python virtual environment can be activated with `source env/bin/activate`. With the Python virtual environment activated, install the CPLEX Python bindings according to the IBM documentation.
 
 
 ## Experiments
