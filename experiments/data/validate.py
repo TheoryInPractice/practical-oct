@@ -22,7 +22,9 @@ def _generate_summary_csv(csv_dir, summary_filename):
     with open(str(csv_dir / summary_filename), 'w') as outfile:
         outfile.write('dataset,vertices,edges\n')
         for dataset in datasets:
-            with open(str(input_dir / dataset), 'r') as infile:
+            filename = str(input_dir / dataset) + '.edgelist'
+            print(filename)
+            with open(filename, 'r') as infile:
                 vertices, edges = map(int, infile.readline().split())
                 outfile.write('{},{},{}\n'.format(dataset, vertices, edges))
     print('Wrote {}'.format(summary_filename))
@@ -44,7 +46,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '-precomputed',
         type=str,
-        help='Filename for the precomputed results to validate against')
+        help='Filename for the precomputed results to validate against',
+        required=True)
     args = parser.parse_args()
 
     # Compare current results with specified results file
