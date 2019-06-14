@@ -43,5 +43,5 @@ akiba-iwata-preprocessing:
 	(cd $(AKIBA_IWATA_PREPROCESSING_DIR) && exec ./build.sh)
 
 virtualenv:
-	/bin/test -d $(ENV_DIR) || (virtualenv $(ENV_DIR) --python=python3.5)
+	/bin/test -d $(ENV_DIR) || (virtualenv $(ENV_DIR) --python=python3)
 	./$(ENV_DIR)/bin/pip install -r requirements.txt
