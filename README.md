@@ -77,7 +77,7 @@ size,time,"certificate"
 where `size` is the number of vertices in the certificate, `time` is the total time in milliseconds,
 and `certificate` is a Python formatted list of vertices.
 
-### Huffner Solver
+### Iterative Compression Solver
 
 Solves OCT on a Hüffner formatted graph file.
 
