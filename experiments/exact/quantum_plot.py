@@ -9,17 +9,19 @@ from experiments import (
     GROUND_TRUTH_DATA_FILE
 )
 from experiments.datasets import preprocessed
-from experiments.exact import (
-    IC,
-    AI,
-    ILP,
-    ILP1T,
-    EXACT_RESULTS_DATA_PATH
-)
+
 from itertools import zip_longest
 import pathlib
 import pandas
 import re
+
+EXACT_RESULTS_DATA_PATH = RESULTS_DIR / 'quantum_exact_results.csv'
+
+IC = 'ic'
+AI = 'vc'
+ILP = 'ilp'
+ILP1T = 'ilp_1t'
+
 
 # Constants
 SOLVER_ORDERING = [ILP, ILP1T, AI, IC]
@@ -152,7 +154,7 @@ def main():
 
     # Write output
     pathlib.Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
-    output_filename = str(OUTPUT_DIR / 'exact.tex')
+    output_filename = str(OUTPUT_DIR / 'quantum_exact.tex')
     with open(output_filename, 'w') as output:
         output.writelines(map(lambda l: l + '\n', output_lines))
 
@@ -160,3 +162,4 @@ def main():
 # Invoke main
 if __name__ == '__main__':
     main()
+    print("Wrote quantum_exact.tex")

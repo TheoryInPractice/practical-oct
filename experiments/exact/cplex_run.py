@@ -128,10 +128,6 @@ def main(current_server_id, total_servers, seed_filter):
             ])
             output.flush()
 
-    # Now generate the ground truth table if akiba_iwata was run
-    if (AI, _run_ai) in solvers:
-        _generate_ground_truth()
-
 
 # Invoke main
 if __name__ == '__main__':

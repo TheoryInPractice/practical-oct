@@ -145,7 +145,7 @@ if __name__ == '__main__':
         print('For {} and seed {}'.format(dataset, seed))
         # Generate the sanitized ER random graph
         print('- Generating Erdos-Renyi')
-        graph = read_edgelist(input_dir, dataset)
+        graph = read_edgelist(input_dir, dataset + '.edgelist')
         er_graph = _generate_er(graph, seed)
         reset_labels(er_graph)
         # Write the graph
@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
         # Generate the sanitized CL random graph
         print('- Generating Chung-Lu')
-        graph = read_edgelist(input_dir, dataset)
+        graph = read_edgelist(input_dir, dataset + '.edgelist')
         cl_graph = _generate_cl(graph, seed)
         reset_labels(cl_graph)
         # Write the graph
@@ -165,7 +165,7 @@ if __name__ == '__main__':
 
         # Generate the sanitized BA random graph
         print('- Generating Barabasi-Albert')
-        graph = read_edgelist(input_dir, dataset)
+        graph = read_edgelist(input_dir, dataset + '.edgelist')
         ba_graph = _generate_ba(graph, seed)
         reset_labels(ba_graph)
         # Write the graph
@@ -175,7 +175,7 @@ if __name__ == '__main__':
 
         # Generate the sanitized TO random graph
         print('- Generating Tunable OCT')
-        graph = read_edgelist(input_dir, dataset)
+        graph = read_edgelist(input_dir, dataset + '.edgelist')
         upper_bound = oct_upper_bound[graph.graph['name']]
         to_graph = _generate_to(graph, seed, upper_bound)
         reset_labels(to_graph)

@@ -37,7 +37,7 @@ def _sanitize_huffner(original_dir, sanitized_dir):
     for dataset in data_names:
         # Sanitize the graph and write
         print('Sanitizing', dataset)
-        graph = read_huffner(original_dir / 'huffner', dataset)
+        graph = read_huffner(original_dir / 'huffner', dataset + '.graph')
         graph = reset_labels(graph)
         write_edgelist(graph, sanitized_dir / 'edgelist')
         write_huffner(graph, sanitized_dir / 'huffner')
@@ -52,7 +52,7 @@ def _sanitize_select_beasley(original_dir, sanitized_dir, data_names):
     for dataset in data_names:
         # Sanitize the graph and write
         print('Sanitizing', dataset)
-        graph = read_beasley(original_dir / 'beasley', dataset)
+        graph = read_beasley(original_dir / 'beasley', dataset + '.txt')
         graph = reset_labels(graph)
         write_edgelist(graph, sanitized_dir / 'edgelist')
         write_huffner(graph, sanitized_dir / 'huffner')
@@ -64,7 +64,7 @@ def _sanitize_select_gka(original_dir, sanitized_dir, data_names):
     for dataset in data_names:
         # Sanitize the graph and write
         print('Sanitizing', dataset)
-        graph = read_beasley(original_dir / 'gka', dataset)
+        graph = read_beasley(original_dir / 'gka', dataset + '.txt')
         graph = reset_labels(graph)
         write_edgelist(graph, sanitized_dir / 'edgelist')
         write_huffner(graph, sanitized_dir / 'huffner')
@@ -84,10 +84,10 @@ if __name__ == '__main__':
     # We begin with selecting data
     # For Huffner take all .graph files and no work needs to be done
     # For Beasley take all bqp50 and bqp100 graphs
-    beasley_data = chain(['bqp50_{}.txt'.format(i) for i in range(1, 11)],
-                         ['bqp100_{}.txt'.format(i) for i in range(1, 11)])
+    beasley_data = chain(['bqp50_{}'.format(i) for i in range(1, 11)],
+                         ['bqp100_{}'.format(i) for i in range(1, 11)])
     # For GKA keep graphs 1 through 35
-    gka_data = ['gka_{}.txt'.format(i) for i in range(1, 36)]
+    gka_data = ['gka_{}'.format(i) for i in range(1, 36)]
 
     # We then sanitize and write to data/converted/
     _create_sanitized_dirs(sanitized_dir)

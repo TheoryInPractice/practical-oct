@@ -177,9 +177,10 @@ def write_snap(graph, output_dir):
     Write a qubo in the style of Akiba-Iwata's snap files.
     """
     name = '{}.snap'.format(graph.graph['name'])
+    order = 2 * graph.order()
+    size = 2 * graph.size() + graph.order()
     with open_path(output_dir / name, 'w') as outfile:
-        outfile.write('# Nodes: {} Edges: {}\n'.format(graph.order(),
-                                                       graph.size()))
+        outfile.write('# Nodes: {} Edges: {}\n'.format(order, size))
         outfile.write('# FromNodeId \t ToNodeId\n')
         for vertex in graph.nodes():
             outfile.write('{} {}\n'.format(vertex, vertex + graph.order()))

@@ -1,289 +1,233 @@
-"""ILP Experiment Plot Script."""
-
-from experiments import (
-    headers,
-    logger,
-    PLOTS_DIR,
-    TABLES_DIR
-)
-from experiments.ilp import (
-    ILP_RESULTS_FILE_PATH
-)
-from itertools import chain, zip_longest
-from matplotlib import pyplot as plt, rc
-import math
-import pandas
-import re
 import seaborn as sns
+import pandas as pd
+import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings("ignore")
 
 
-# Configure matplotlib
-rc('text', usetex=True)
+def _load_raw_data(filename):
+    dataframe = pd.read_csv(filename, header=0)
+    return dataframe
 
 
-# Constants
-DATASET_ORDER = [
-    'gka-1', 'aa-43', 'aa-45', 'gka-2',
-    'aa-29', 'aa-42', 'aa-32', 'gka-3',
-    'aa-41', 'gka-26', 'gka-24',  'gka-25',
-    'gka-29', 'gka-27', 'gka-28'
-]
-LATEX_SOLVER_TEMPLATE = (
-    r'$\textsf{{{}}}_\textsc{{\tiny {}}}^\textsc{{\tiny {}}}$'
-)
-HUE_ORDER = [
-    LATEX_SOLVER_TEMPLATE.format('CPLEX', 1, 'OCT'),
-    LATEX_SOLVER_TEMPLATE.format('CPLEX', 4, 'OCT'),
-    LATEX_SOLVER_TEMPLATE.format('CPLEX', 1, 'VC'),
-    LATEX_SOLVER_TEMPLATE.format('CPLEX', 4, 'VC')
-]
-HUE_KWS = {
-    'color': ['limegreen', 'green', 'lightskyblue', 'blue']
-}
-TABLE_SOLVER_ORDER = [
-    'C(4, vc)',
-    'C(1, vc)',
-    'G(1, vc)',
-]
-TABLE_HEADERS = [
-    headers.DATASET, headers.VERTICES, headers.EDGES,
-    headers.OPT, headers.TIME
-]
+def _refine_data(dataframe):
+    # Rename solvers
+    solver_name_map = {'ilp_oct_1t': 'OCT-1T',
+                       'ilp_vc_1t': 'VC-1T',
+                       'ilp_oct_4t': 'OCT-4T',
+                       'ilp_vc_4t': 'VC-4T'}
+    dataframe['Solver'] = dataframe['Solver'].map(solver_name_map)
 
+    # Compute dataset order so they're in the run time order of VC 1t
+    # First get order of dataset names when sorting by VC 1t run time
+    baseline_df = dataframe.loc[
+        dataframe['Solver'] == 'VC-1T']
+    baseline_df.sort_values(by=['Time'], inplace=True)
+    dataset_order = list(baseline_df['Dataset'])
 
-def _plot_results(memory, filename):
-    """Generate ILP experiment result plots."""
+    # If a dataset is missing for a solver, add a row with a -1 size and the
+    # timeout time
+    for dataset in dataset_order:
+        for solver in ['VC-1T', 'VC-4T', 'OCT-1T', 'OCT-4T']:
+            if not ((dataframe['Solver'] == solver) &
+                    (dataframe['Dataset'] == dataset)).any():
+                new_row = {'Dataset': dataset,
+                           'Solver': solver,
+                           'Time': -1,
+                           'Size': -1,
+                           'Certificate': ""}
+                dataframe = dataframe.append(new_row, ignore_index=True)
 
-    # Log
-    logger.info('Plotting results figure: {}'.format(filename))
+    # Change the run time so that it's relative to VC 1t
+    def compute_relative_run_time(row):
+        baseline = dataframe.loc[
+            (dataframe['Dataset'] == row['Dataset']) &
+            (dataframe['Solver'] == 'VC-1T')]
+        baseline_time = float(baseline['Time'])
+        row_time = float(row['Time'])
 
-    # Load dataset
-    data = pandas.read_csv(ILP_RESULTS_FILE_PATH)
-
-    # Raname datasets
-    data[headers.DATASET] = data[headers.DATASET].map(
-        lambda v: re.sub(
-            r'([a-zA-Z]+)(_?)([0-9]+)',
-            lambda m: m.group(1) + '-' + m.group(3),
-            v
-        )
-    )
-
-    # Create order index
-    data['order'] = data.apply(
-        lambda r: DATASET_ORDER.index(r.Dataset),
-        axis=1
-    )
-    data = data.sort_values('order')
-
-    # Create solver_group column
-    data['solver_group'] = data.apply(
-        lambda r: LATEX_SOLVER_TEMPLATE.format(
-            r.Solver.upper(),
-            r.Threads,
-            r.Formulation.upper()
-        ),
-        axis=1
-    )
-
-    # Set common facet
-    data['facet'] = 'common'
-
-    # Subset to those with the desired memory
-    data = data[data['Memory'] == memory]
-
-    # Subset to those that didn't time out
-    data = data[data['Time'] < 600]
-
-    # Rename time
-    data = data.rename(columns={'Time': 'Time (s)'})
-
-    # Draw
-    grid = sns.FacetGrid(
-        data,
-        col='facet',
-        hue='solver_group',
-        hue_order=HUE_ORDER,
-        hue_kws=HUE_KWS
-    ).map(
-        plt.plot,
-        'order',
-        'Time (s)',
-        marker='o'
-    ).add_legend(
-        title='',
-        bbox_to_anchor=(1.4, 0.5, 0, 0)
-    )
-
-    # Set X axis labels and rotate
-    # Reduce dataset names
-    plt.xticks(
-        range(len(DATASET_ORDER)),
-        map(lambda d: d.replace('bqp', ''), DATASET_ORDER)
-    )
-    for ax in grid.axes.flatten():
-        ax.set_xlabel('Dataset')
-        for tick in ax.get_xticklabels():
-            tick.set(rotation=90)
-
-    # Set tight layout. This prevents labels from overlapping.
-    grid.fig.tight_layout()
-
-    # Set title
-    if memory < 1024:
-        unit = 'MB'
-    else:
-        memory = int(memory / 1024)
-        unit = 'GB'
-    plt.title('CPLEX Solution Times ({} {})'.format(memory, unit))
-
-    # Save. bbox_inches=tight forces inclusion of legend
-    # by bounding box for figure, so it is not cut off.
-    grid.fig.savefig(
-        str(PLOTS_DIR / filename),
-        bbox_inches='tight'
-    )
-    plt.close()
-
-
-def _generate_results_table(memory, filename):
-    """Generate latex results table."""
-
-    # Log
-    logger.info('Generating results table: {}'.format(filename))
-
-    # Load data file
-    data = pandas.read_csv(ILP_RESULTS_FILE_PATH)
-
-    # Filter to only the memory value we want
-    data = data.loc[data['Memory'] == memory]
-
-    # Subset to those that didn't time out
-    data = data[data['Time'] < 600]
-
-    # Create solver_group column
-    data['solver_group'] = data.apply(
-        lambda r: '{}({}, {})'.format(
-            r.Solver[0],
-            r.Threads,
-            r.Formulation.lower()
-        ),
-        axis=1
-    )
-
-    # Drop unused columns
-    data = data.drop(
-        ['Solver', 'Threads', 'Formulation', 'Certificate', 'Memory'],
-        axis=1
-    )
-
-    # Set index, pivot, unset index, then rename columns
-    data = data.set_index(['Dataset', 'Vertices', 'Edges', 'Opt'])
-    data = data.pivot(columns='solver_group')
-    data = data.reset_index()
-    data.columns = [c[1] or c[0] for c in data.columns.values]
-
-    # Add any columns that don't exist
-    # This happens if there is no data for some solver (*GLPK*)
-    for solver in TABLE_SOLVER_ORDER:
-        if solver not in data:
-            data[solver] = math.nan
-
-    # Group by dataset and aggregate
-    data = data.groupby(['Dataset'], as_index=False).agg({
-        'Vertices': 'max',
-        'Edges': 'max',
-        'Opt': 'min',
-        **{
-            solver: lambda l: next(chain(
-                (x for x in l if not math.isnan(x)),
-                [math.nan]
-            ))
-            for solver in TABLE_SOLVER_ORDER
-        }
-    })
-
-    # Add CPLEX ground truth
-    data['Time'] = data['C(4, vc)']
-
-    def _map_to_relative_time(s):
-        """Function for mapping a (Time, Solver) tuple to a relative time."""
-
-        if s[0] == 0:
-            if s[1] == 0:
-                s[1] = 1
+        # Handle some exception cases
+        if row_time == -1:
+            result = 100000
+        elif baseline_time == 0:
+            if row_time == 0:
+                result = 1
             else:
-                s[1] = math.inf
+                result = 100000
         else:
-            s[1] = s[1] / s[0]
-        return s
+            result = row_time / baseline_time
+        return result
 
-    # Compute the appropriate relative time for each solver
-    for cols in map(list, zip_longest([], TABLE_SOLVER_ORDER, fillvalue='Time')):
-        data[cols] = data[cols].apply(_map_to_relative_time, axis=1)
+    dataframe['Relative Run Time'] = dataframe.apply(compute_relative_run_time,
+                                                     axis=1)
 
-    def _rel_time_to_latex(e):
-        """Function for formatting a relative time in latex."""
+    # Add 0.001 to zero run times so points display properly.
+    def buffer_zero_run_time(row):
+        if row['Time'] == 0:
+            return 0.001
+        else:
+            return row['Time']
+    dataframe['Time'] = dataframe.apply(buffer_zero_run_time, axis=1)
 
-        if math.isnan(e):
-            return '-'
-        elif math.isinf(e):
-            return '${}\\times$'.format(e)
-        return '${}\\times$'.format(round(e, 1))
+    # Add runtime categories
+    def regime_map(row):
+        cache = row['Relative Run Time']
+        if cache == 1:
+            return 'Identical'
+        elif cache == 100000:
+            return 'Timed Out'
+        elif cache > 1:
+            return 'Slower'
+        else:
+            return 'Faster'
+    dataframe['Regime'] = dataframe.apply(regime_map, axis=1)
 
-    # Converet relative times to latex formatting
-    data[TABLE_SOLVER_ORDER] = data[TABLE_SOLVER_ORDER].apply(
-        lambda s: s.map(_rel_time_to_latex)
-    )
+    # Order the rows by the dataset order
+    dataframe['Dataset'] = pd.Categorical(dataframe['Dataset'], dataset_order)
+    dataframe.sort_values(by='Dataset', inplace=True)
 
-    # Reindex for ordered columns
-    data = data.reindex(
-        ['Dataset', 'Vertices', 'Edges', 'Opt', 'Time', *TABLE_SOLVER_ORDER],
-        axis=1
-    )
+    # Add a dataset number
+    dataset_ids = {}
+    for counter, dataset in enumerate(dataset_order):
+        dataset_ids[dataset] = counter + 1
+    dataframe['Dataset ID'] = dataframe['Dataset'].map(dataset_ids)
 
-    # Raname datasets
-    data[headers.DATASET] = data[headers.DATASET].map(
-        lambda v: re.sub(
-            r'([a-zA-Z]+)(_?)([0-9]+)',
-            lambda m: m.group(1) + '-' + m.group(3),
-            v
-        )
-    )
-
-    # Create order index, sort, and drop
-    data['order'] = data.apply(
-        lambda r: DATASET_ORDER.index(r.Dataset),
-        axis=1
-    )
-    data = data.sort_values('order').drop(columns='order')
-
-    # Rename
-    data = data.rename(columns={
-        'Vertices': '|V|',
-        'Edges': '|E|'
-    })
-
-    # Print latex table
-    data.to_latex(
-        str(TABLES_DIR / filename),
-        escape=False,
-        index=False,
-        column_format=''.join(['l'] + ['r'] * (len(data.columns.values) - 1))
-    )
+    return dataframe
 
 
-def main():
-    """Run plots."""
+def _plot_oct(dataframe, output_filename):
+    sns.set_style("darkgrid")
 
-    outputs = [
-        (4, 'ilp_experiment_4mb.pdf', 'ilp_table_4mb.tex'),
-        (16384, 'ilp_experiment.pdf', 'ilp_table.tex')
-    ]
-    for memory, fig, table in outputs:
-        _plot_results(memory, fig)
-        _generate_results_table(memory, table)
+    # Use latex text
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
+
+    # Define color palette
+    colors = ["dusty purple", "windows blue", "amber", "faded green"]
+    palette = sns.xkcd_palette(colors)
+
+    # Make plot
+    solver_order = ['OCT-1T', 'OCT-4T']
+
+    g = sns.FacetGrid(data=dataframe,
+                      col="Solver",
+                      col_order=solver_order,
+                      col_wrap=2,
+                      hue='Regime',
+                      hue_order=['Timed Out', 'Identical', 'Slower'],
+                      height=2.3,
+                      aspect=1.7,
+                      palette=palette)
+    g = (g.map(sns.scatterplot, "Dataset ID", "Relative Run Time")
+         .add_legend())
+
+    g.set(yscale='log')
+    plt.ylim(0.5, 200000)
+
+    # Update titles
+    titles = ['OCT-1T', 'OCT-4T']
+    for axis in g.fig.axes:
+        axis.set_title(titles.pop(0))
+
+    # Facet titles
+    g.set_ylabels(r'\textbf{Run Time Ratio}')
+    g.set_xlabels(r'\textbf{Dataset ID (Sorted by VC-1T)}')
+
+    # Save plot
+    g.savefig(output_filename)
+
+
+def _plot_vc(dataframe, output_filename):
+    sns.set_style("darkgrid")
+
+    # Use latex text
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
+
+    # Define color palette
+    colors = ["windows blue", "amber", "faded green"]
+    palette = sns.xkcd_palette(colors)
+
+    # Make plot
+    solver_order = ['VC-4T']
+
+    g = sns.FacetGrid(data=dataframe,
+                      col="Solver",
+                      col_order=solver_order,
+                      hue='Regime',
+                      hue_order=['Identical', 'Slower', 'Faster'],
+                      height=2.3,
+                      aspect=1.7,
+                      palette=palette)
+    g = (g.map(sns.scatterplot, "Dataset ID", "Relative Run Time")
+         .add_legend())
+
+    g.set(yscale='log')
+    plt.ylim(0.01, 10)
+
+    # Update titles
+    titles = ['VC-4T']
+    for axis in g.fig.axes:
+        axis.set_title(titles.pop(0))
+
+    # Facet titles
+    g.set_ylabels(r'\textbf{Run Time Ratio}')
+    g.set_xlabels(r'\textbf{Dataset ID (Sorted by VC-1T)}')
+
+    # Save plot
+    g.savefig(output_filename)
+
+
+def _plot_vc_runtime(dataframe, output_filename):
+    sns.set_style("darkgrid")
+
+    # Use latex text
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
+
+    # Define color palette
+    colors = ["windows blue"]
+    palette = sns.xkcd_palette(colors)
+
+    # Make plot
+    solver_order = ['VC-1T']
+
+    g = sns.FacetGrid(data=dataframe,
+                      col="Solver",
+                      col_order=solver_order,
+                      height=2.3,
+                      aspect=1.7,
+                      palette=palette)
+    g = (g.map(sns.scatterplot, "Dataset ID", "Time").add_legend())
+
+    g.set(yscale='log')
+    plt.ylim(0.0005, 10000)
+
+    # Update titles
+    titles = ['VC-1T']
+    for axis in g.fig.axes:
+        axis.set_title(titles.pop(0))
+
+    # Facet titles
+    g.set_ylabels(r'\textbf{Run Time (sec)}')
+    g.set_xlabels(r'\textbf{Dataset ID (Sorted by VC-1T)}')
+
+    # Save plot
+    g.savefig(output_filename)
 
 
 if __name__ == '__main__':
-    main()
+    df = _load_raw_data('results/cplex_results.csv')
+    print("Loaded results/cplex_results.csv")
+
+    df = _refine_data(df)
+    print("Refined dataframe")
+
+    _plot_oct(df, 'figures/cplex_plot_oct.pdf')
+    print("Generated figures/cplex_plot_oct.pdf")
+
+    _plot_vc(df, 'figures/cplex_plot_vc.pdf')
+    print("Generated figures/cplex_plot_vc.pdf")
+
+    _plot_vc_runtime(df, 'figures/cplex_plot_vc_runtime.pdf')
+    print("Generated figures/cplex_plot_vc_runtime.pdf")
