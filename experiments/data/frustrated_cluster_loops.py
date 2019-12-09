@@ -88,7 +88,7 @@ def generate_fcls(clique_sizes: Iterable[int] = DEFAULT_CLIQUE_SIZES,
         x=x,
         y=y,
     )
-    plt.savefig(str(FCL_DATA_DIR / 'plot.pdf'))
+    plt.savefig(str(FCL_DATA_DIR / 'plot.png'), dpi=300)
     plt.close()
 
     # Reset random state
