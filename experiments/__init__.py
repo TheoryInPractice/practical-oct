@@ -38,8 +38,9 @@ RESULTS_DIR = PROJECT_ROOT / 'results'
 GROUND_TRUTH_DATA_FILE = RESULTS_DIR / 'ground_truth.csv'
 PLOTS_DIR = PROJECT_ROOT / 'figures'
 TABLES_DIR = PROJECT_ROOT / 'tables'
-ORIGINAL_DATA_DIR = PROJECT_ROOT / 'data/original'
-PREPROCESSED_DATA_DIR = PROJECT_ROOT / 'data/preprocessed'
+DATA_DIR = PROJECT_ROOT / 'data'
+ORIGINAL_DATA_DIR = DATA_DIR / 'original'
+PREPROCESSED_DATA_DIR = DATA_DIR / 'preprocessed'
 HUFFNER_DATA_DIR = PREPROCESSED_DATA_DIR / 'huffner'
 HUFFNER_DATA_EXT = '.huffner'
 ORIGINAL_HUFFNER_DATA_EXT = '.graph'
@@ -48,10 +49,12 @@ SNAP_DATA_EXT = '.snap'
 EDGELIST_DATA_DIR = PREPROCESSED_DATA_DIR / 'edgelist'
 EDGELIST_DATA_EXT = '.edgelist'
 BEASLEY_EXT = '.txt'
+FCL_DATA_DIR = DATA_DIR / 'fcls'
 RESULTS_DIR.mkdir(exist_ok=True, parents=True)
 PLOTS_DIR.mkdir(exist_ok=True, parents=True)
 TABLES_DIR.mkdir(exist_ok=True, parents=True)
 HUFFNER_DATA_DIR.mkdir(exist_ok=True, parents=True)
+FCL_DATA_DIR.mkdir(exist_ok=True, parents=True)
 
 
 # Helper functions
