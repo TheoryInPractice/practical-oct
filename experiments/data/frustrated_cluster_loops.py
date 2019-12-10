@@ -6,7 +6,7 @@ https://docs.ocean.dwavesys.com/projects/dimod/en/latest/reference/bqm/generated
 
 # Imports
 from itertools import product
-from typing import Iterable
+from typing import Iterable, Optional
 import argparse
 import random
 
@@ -23,14 +23,15 @@ from src.preprocessing import graphs
 DEFAULT_CLIQUE_SIZES = (64, 96, 128)
 DEFAULT_NUM_CYCLES = (1/3, 2/3, 3/3)
 DEFAULT_NUM_FCLS = 10
-SEED = 882351143
+DEFAULT_SEED = 882351143
 MIN_SEED = 0
 MAX_SEED = 2**32 - 1
 
 
 def generate_fcls(clique_sizes: Iterable[int] = DEFAULT_CLIQUE_SIZES,
                   num_cycles: Iterable[float] = DEFAULT_CLIQUE_SIZES,
-                  num_fcls: int = DEFAULT_NUM_FCLS):
+                  num_fcls: int = DEFAULT_NUM_FCLS,
+                  seed: Optional[int] = DEFAULT_SEED):
     """Generate frustrated cluster loops.
 
     Parameters
@@ -44,10 +45,16 @@ def generate_fcls(clique_sizes: Iterable[int] = DEFAULT_CLIQUE_SIZES,
     num_fcls : int
         Number of FCLs to generate for each combination of clique size and
         number of cycles.
+    seed : Optional[int]
+        Seed for randomness in generating FCLs. Setting this guarantees a
+        deterministic outcome.
     """
     # Get current random state and set seed
-    state = random.getstate()
-    random.seed(SEED)
+    if seed is not None:
+        state = random.getstate()
+        random.seed(seed)
+    else:
+        state = None
 
     # All fcls
     fcls = []
@@ -70,16 +77,18 @@ def generate_fcls(clique_sizes: Iterable[int] = DEFAULT_CLIQUE_SIZES,
 
             # Generate a graph from the non-zero edges
             fcl = nx.Graph()
-            fcl.add_nodes_from(bqm.linear.keys())
             fcl.add_weighted_edges_from(
                 (*e, w) for e, w in bqm.quadratic.items() if w
             )
-            fcls.append(fcl)
 
-            # Form filename
+            # Set graph name (will be used as filename)
             fcl.graph['name'] = 'fcl_{}_{:.2f}_{}'.format(clique, cycles, i)
 
-            # Write edgelist
+            # Normalize node labels to integers in the range 0..n.
+            fcl = graphs.reset_labels(fcl)
+
+            # Store
+            fcls.append(fcl)
             graphs.write_edgelist(fcl, FCL_DATA_DIR)
 
     # Plot stats
@@ -92,7 +101,8 @@ def generate_fcls(clique_sizes: Iterable[int] = DEFAULT_CLIQUE_SIZES,
     plt.close()
 
     # Reset random state
-    random.setstate(state)
+    if state is not None:
+        random.setstate(state)
 
 
 def main():
@@ -121,10 +131,21 @@ def main():
         default=DEFAULT_NUM_FCLS,
         help='Number of FCLs',
     )
+    parser.add_argument(
+        '--seed',
+        type=int,
+        default=DEFAULT_SEED,
+        help='Seed for randomness in generating FCLs.'
+    )
     argv = parser.parse_args()
 
     # Generate FCLs
-    generate_fcls(clique_sizes=argv.clique_sizes, num_cycles=argv.num_cycles)
+    generate_fcls(
+        clique_sizes=argv.clique_sizes,
+        num_cycles=argv.num_cycles,
+        num_fcls=argv.num_fcls,
+        seed=argv.seed,
+    )
 
 
 # Invoke main
