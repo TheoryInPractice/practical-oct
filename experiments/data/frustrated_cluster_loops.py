@@ -49,6 +49,14 @@ def generate_fcls(clique_sizes: Iterable[int] = DEFAULT_CLIQUE_SIZES,
         Seed for randomness in generating FCLs. Setting this guarantees a
         deterministic outcome.
     """
+    # Create output directories
+    edgelist_dir = FCL_DATA_DIR / 'edgelist'
+    edgelist_dir.mkdir(exist_ok=True, parents=True)
+    huffner_dir = FCL_DATA_DIR / 'huffner'
+    huffner_dir.mkdir(exist_ok=True, parents=True)
+    snap_dir = FCL_DATA_DIR / 'snap'
+    snap_dir.mkdir(exist_ok=True, parents=True)
+
     # Get current random state and set seed
     if seed is not None:
         state = random.getstate()
@@ -89,7 +97,9 @@ def generate_fcls(clique_sizes: Iterable[int] = DEFAULT_CLIQUE_SIZES,
 
             # Store
             fcls.append(fcl)
-            graphs.write_edgelist(fcl, FCL_DATA_DIR)
+            graphs.write_edgelist(fcl, edgelist_dir)
+            graphs.write_huffner(fcl, huffner_dir)
+            graphs.write_snap(fcl, snap_dir)
 
     # Plot stats
     x, y = zip(*map(lambda g: (len(g.nodes()), len(g.edges())), fcls))
