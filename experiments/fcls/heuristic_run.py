@@ -1,8 +1,7 @@
 """Experiment runner.
 
-The frustrated cluster loop experiment runs heuristic and exact solvers
-against the FCL dataset. Heuristics are run at different timeout levels,
-exact solvers are given a single timeout.
+This frustrated cluster loop experiment runs heuristic solvers against the FCL
+dataset. Heuristics are run at different timeout levels.
 """
 
 
