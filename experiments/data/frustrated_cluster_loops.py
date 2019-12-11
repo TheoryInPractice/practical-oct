@@ -19,13 +19,18 @@ from experiments import FCL_DATA_DIR, logger
 from src.preprocessing import graphs
 
 
+# Paths
+PLOT = str(FCL_DATA_DIR / 'plot.png')
+
+
 # Constants
 DEFAULT_CLIQUE_SIZES = (64, 96, 128)
-DEFAULT_NUM_CYCLES = (1/3, 2/3, 3/3)
+DEFAULT_NUM_CYCLES = tuple(round(f, 2) for f in (1/3, 2/3, 1,))
 DEFAULT_NUM_FCLS = 10
 DEFAULT_SEED = 882351143
 MIN_SEED = 0
 MAX_SEED = 2**32 - 1
+DPI = 300
 
 
 def generate_fcls(clique_sizes: Iterable[int] = DEFAULT_CLIQUE_SIZES,
@@ -64,8 +69,9 @@ def generate_fcls(clique_sizes: Iterable[int] = DEFAULT_CLIQUE_SIZES,
     else:
         state = None
 
-    # All fcls
+    # All fcls and plotting data
     fcls = []
+    data = []
 
     # Generate fcls
     for clique, cycles in product(clique_sizes, num_cycles):
@@ -100,14 +106,29 @@ def generate_fcls(clique_sizes: Iterable[int] = DEFAULT_CLIQUE_SIZES,
             graphs.write_edgelist(fcl, edgelist_dir)
             graphs.write_huffner(fcl, huffner_dir)
             graphs.write_snap(fcl, snap_dir)
+            data.append((
+                len(fcl.nodes()),
+                len(fcl.edges()),
+                (clique, cycles,),
+            ))
 
     # Plot stats
-    x, y = zip(*map(lambda g: (len(g.nodes()), len(g.edges())), fcls))
-    sns.scatterplot(
-        x=x,
-        y=y,
+    x, y, hue = zip(*data)
+    sns.scatterplot(x=x, y=y, hue=hue)
+    plt.title('Frustrated Cluster Loops')
+    plt.xlabel('Nodes')
+    plt.ylabel('Edges')
+    legend = plt.legend(
+        title='(clique_size, num_cycles)',
+        loc='upper left',
+        bbox_to_anchor=(1.0, 1.0,),
     )
-    plt.savefig(str(FCL_DATA_DIR / 'plot.png'), dpi=300)
+    plt.savefig(
+        PLOT,
+        dpi=DPI,
+        bbox_extra_artists=(legend,),
+        bbox_inches='tight',
+    )
     plt.close()
 
     # Reset random state
@@ -127,13 +148,14 @@ def main():
         help='Size of input cliques. Must be (small, medium, large). '
              'Default = {}'.format(DEFAULT_CLIQUE_SIZES),
     )
+    from decimal import Decimal
     parser.add_argument(
         '--num-cycles',
         nargs=3,
         type=float,
         default=DEFAULT_NUM_CYCLES,
         help='Number of cycles in the FCL, expressed as a percentage of n. '
-             'Default = ({:.2f}, {:.2f},  {:.2f})'.format(*DEFAULT_NUM_CYCLES),
+             'Default = {}'.format(DEFAULT_NUM_CYCLES),
     )
     parser.add_argument(
         '--num-fcls',
