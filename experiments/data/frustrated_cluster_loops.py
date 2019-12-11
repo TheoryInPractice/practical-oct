@@ -24,9 +24,9 @@ PLOT = str(FCL_DATA_DIR / 'plot.png')
 
 
 # Constants
-DEFAULT_CLIQUE_SIZES = (64, 96, 128)
-DEFAULT_NUM_CYCLES = tuple(round(f, 2) for f in (1/3, 2/3, 1,))
-DEFAULT_NUM_FCLS = 10
+DEFAULT_CLIQUE_SIZES = (64, 80, 96, 112, 128,)
+DEFAULT_NUM_CYCLES = (0.05, 0.10, 0.15, 0.20, 0.25, 0.3)
+DEFAULT_NUM_FCLS = 5
 DEFAULT_SEED = 882351143
 MIN_SEED = 0
 MAX_SEED = 2**32 - 1
@@ -126,7 +126,7 @@ def generate_fcls(clique_sizes: Iterable[int] = DEFAULT_CLIQUE_SIZES,
     plt.savefig(
         PLOT,
         dpi=DPI,
-        bbox_extra_artists=(legend,),
+        # bbox_extra_artists=(legend,),
         bbox_inches='tight',
     )
     plt.close()
