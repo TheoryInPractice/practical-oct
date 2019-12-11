@@ -142,7 +142,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--clique-sizes',
-        nargs=3,
+        nargs='+',
         type=int,
         default=DEFAULT_CLIQUE_SIZES,
         help='Size of input cliques. Must be (small, medium, large). '
@@ -151,7 +151,7 @@ def main():
     from decimal import Decimal
     parser.add_argument(
         '--num-cycles',
-        nargs=3,
+        nargs='+',
         type=float,
         default=DEFAULT_NUM_CYCLES,
         help='Number of cycles in the FCL, expressed as a percentage of n. '
