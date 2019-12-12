@@ -2,16 +2,43 @@
 
 
 # Imports
+from typing import List
 import argparse
 import subprocess
 import time
 
 
-def _certificate_to_oct(num_vertices, certificate):
-    """Transform a VC certificate into an OCT certificate"""
+def _certificate_to_oct(num_vertices: int,
+                        certificate: List[int]) -> List[int]:
+    """Transform a VC certificate into an OCT certificate
 
-    # Map all vertices to ints and store as a set
-    vertex_set = set(map(int, certificate))
+    Parameters
+    ----------
+    num_vertices : int
+        The number of vertices present in the VC formulation graph. This graph
+        is expected to have vertex labels normalized to the range
+        0..num_vertices.
+    certificate : List[int]
+        Vertices present in a solution to the VC formulation.
+
+    Returns
+    -------
+    List[int]
+        A list of vertices forming a valid certificate to the OCT formulation
+        of the problem.
+    """
+    if not num_vertices % 2 == 0:
+        raise Exception(
+            'Converting a certificate from the VC formulation to the OCT '
+            'formulation expects an even number of vertices.'
+        )
+
+    # The VC formulation doubles OCT vertices, so halve the number of vertices
+    # to go in the opposite direction.
+    num_vertices //= 2
+
+    # Store all vertices in the certificate as a set
+    vertex_set = set(certificate)
 
     # Construct new vertex
     return [
@@ -70,7 +97,7 @@ def solve(filename, timeout=None, convert_to_oct=False):
     total_time = time.time() - start
 
     # Get output and pop the first line (which is the size)
-    certificate = bytes.decode(stdout, 'utf-8').strip().split()
+    certificate = list(map(int, bytes.decode(stdout, 'utf-8').strip().split()))
     certificate.pop(0)
 
     # Convert to OCT
@@ -78,7 +105,7 @@ def solve(filename, timeout=None, convert_to_oct=False):
         certificate = _certificate_to_oct(num_vertices, certificate)
 
     # Return
-    return (round(total_time, 1), len(certificate), certificate)
+    return round(total_time, 1), len(certificate), certificate
 
 
 def main():
