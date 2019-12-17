@@ -199,8 +199,8 @@ def main():
                     # Write results
                     csv_writer.writerow([
                         name,
-                        timeout,
                         sn,
+                        timeout,
                         time,
                         size,
                         certificate
