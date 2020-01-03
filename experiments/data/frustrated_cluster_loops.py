@@ -5,6 +5,7 @@ https://docs.ocean.dwavesys.com/projects/dimod/en/latest/reference/bqm/generated
 
 
 # Imports
+from functools import partial
 from itertools import product
 from typing import Iterable, Optional
 import argparse
@@ -19,28 +20,41 @@ from experiments import FCL_DATA_DIR, logger
 from src.preprocessing import graphs
 
 
-# Paths
-PLOT = str(FCL_DATA_DIR / 'plot.png')
-
-
-# Constants
-DEFAULT_CLIQUE_SIZES = (64, 80, 96, 112, 128,)
+# FCL Constants
+ALL = 'all'
+DW_2000Q = 'dw_2000q'
+DW_8000Q = 'dw_8000q'
+DW_P6 = 'dw_p6'
+DW_P12 = 'dw_p12'
+DW_2000Q_CLIQUE_SIZES = tuple(range(64, 129, 16))
+DW_8000Q_CLIQUE_SIZES = tuple(range(128, 257, 16))
+DW_P6_CLIQUE_SIZES = tuple(range(62, 105, 7))
+DW_P12_CLIQUE_SIZES = tuple(range(134, 249, 19))
 DEFAULT_NUM_CYCLES = (0.05, 0.10, 0.15, 0.20, 0.25, 0.3)
 DEFAULT_NUM_FCLS = 5
+
+
+# Seed values
 DEFAULT_SEED = 882351143
 MIN_SEED = 0
 MAX_SEED = 2**32 - 1
+
+
+# Matplotlib options
 DPI = 300
 
 
-def generate_fcls(clique_sizes: Iterable[int] = DEFAULT_CLIQUE_SIZES,
-                  num_cycles: Iterable[float] = DEFAULT_CLIQUE_SIZES,
+def generate_fcls(dataset_name: str,
+                  clique_sizes: Iterable[int] = DW_2000Q_CLIQUE_SIZES,
+                  num_cycles: Iterable[float] = DEFAULT_NUM_CYCLES,
                   num_fcls: int = DEFAULT_NUM_FCLS,
                   seed: Optional[int] = DEFAULT_SEED):
     """Generate frustrated cluster loops.
 
     Parameters
     ----------
+    dataset_name : str
+        Human readable name for the dataset.
     clique_sizes : Iterable[int, ...]
         Iterable of clique sizes to use in generating FCLs. A base clique of
         each size will be used to generate a set of
@@ -54,12 +68,18 @@ def generate_fcls(clique_sizes: Iterable[int] = DEFAULT_CLIQUE_SIZES,
         Seed for randomness in generating FCLs. Setting this guarantees a
         deterministic outcome.
     """
+    # Log
+    logger.info('Generating FCLs for dataset: {}'.format(dataset_name))
+
+    # Compute output directories
+    dataset_dir = FCL_DATA_DIR / dataset_name
+    edgelist_dir = dataset_dir / 'edgelist'
+    huffner_dir = dataset_dir / 'huffner'
+    snap_dir = dataset_dir / 'snap'
+
     # Create output directories
-    edgelist_dir = FCL_DATA_DIR / 'edgelist'
     edgelist_dir.mkdir(exist_ok=True, parents=True)
-    huffner_dir = FCL_DATA_DIR / 'huffner'
     huffner_dir.mkdir(exist_ok=True, parents=True)
-    snap_dir = FCL_DATA_DIR / 'snap'
     snap_dir.mkdir(exist_ok=True, parents=True)
 
     # Get current random state and set seed
@@ -118,15 +138,14 @@ def generate_fcls(clique_sizes: Iterable[int] = DEFAULT_CLIQUE_SIZES,
     plt.title('Frustrated Cluster Loops')
     plt.xlabel('Nodes')
     plt.ylabel('Edges')
-    legend = plt.legend(
+    plt.legend(
         title='(clique_size, num_cycles)',
         loc='upper left',
         bbox_to_anchor=(1.0, 1.0,),
     )
     plt.savefig(
-        PLOT,
+        '{}/plot.png'.format(str(dataset_dir)),
         dpi=DPI,
-        # bbox_extra_artists=(legend,),
         bbox_inches='tight',
     )
     plt.close()
@@ -136,20 +155,79 @@ def generate_fcls(clique_sizes: Iterable[int] = DEFAULT_CLIQUE_SIZES,
         random.setstate(state)
 
 
+# Define dataset specific generators
+generate_dw_2000q_fcls = partial(
+    generate_fcls,
+    dataset_name=DW_2000Q,
+    clique_sizes=DW_2000Q_CLIQUE_SIZES,
+    num_cycles=DEFAULT_NUM_CYCLES,
+    num_fcls=DEFAULT_NUM_FCLS,
+    seed=DEFAULT_SEED,
+)
+generate_dw_8000q_fcls = partial(
+    generate_fcls,
+    dataset_name=DW_8000Q,
+    clique_sizes=DW_8000Q_CLIQUE_SIZES,
+    num_cycles=DEFAULT_NUM_CYCLES,
+    num_fcls=DEFAULT_NUM_FCLS,
+    seed=DEFAULT_SEED,
+)
+generate_dw_p6_fcls = partial(
+    generate_fcls,
+    dataset_name=DW_P6,
+    clique_sizes=DW_P6_CLIQUE_SIZES,
+    num_cycles=DEFAULT_NUM_CYCLES,
+    num_fcls=DEFAULT_NUM_FCLS,
+    seed=DEFAULT_SEED,
+)
+generate_dw_p12_fcls = partial(
+    generate_fcls,
+    dataset_name=DW_P12,
+    clique_sizes=DW_P12_CLIQUE_SIZES,
+    num_cycles=DEFAULT_NUM_CYCLES,
+    num_fcls=DEFAULT_NUM_FCLS,
+    seed=DEFAULT_SEED,
+)
+
+
 def main():
     """Parse arguments and run frustrated loop generator."""
-    # Parse arguments
+    # Create root parser with subcommands
     parser = argparse.ArgumentParser()
-    parser.add_argument(
+    subparsers = parser.add_subparsers(
+        dest='subcommand',
+        title='Subcommand',
+        description='Specific subcommand to run.',
+        help='Run one of these to get started.',
+    )
+
+    # Configure parser for predefined datasets
+    predefined_parser = subparsers.add_parser('predefined')
+    predefined_parser.add_argument(
+        'dataset',
+        nargs='?',
+        choices=(ALL, DW_2000Q, DW_8000Q, DW_P6, DW_P12,),
+        default=ALL,
+        help='Predefined datasets to generate.',
+    )
+
+    # Configure parser for custom datasets
+    custom_parser = subparsers.add_parser('custom')
+    custom_parser.add_argument(
+        '--dataset-name',
+        type=str,
+        default='default',
+        help='Name for the dataset.',
+    )
+    custom_parser.add_argument(
         '--clique-sizes',
         nargs='+',
         type=int,
-        default=DEFAULT_CLIQUE_SIZES,
+        default=DW_2000Q_CLIQUE_SIZES,
         help='Size of input cliques. Must be (small, medium, large). '
-             'Default = {}'.format(DEFAULT_CLIQUE_SIZES),
+             'Default = {}'.format(DW_2000Q_CLIQUE_SIZES),
     )
-    from decimal import Decimal
-    parser.add_argument(
+    custom_parser.add_argument(
         '--num-cycles',
         nargs='+',
         type=float,
@@ -157,27 +235,46 @@ def main():
         help='Number of cycles in the FCL, expressed as a percentage of n. '
              'Default = {}'.format(DEFAULT_NUM_CYCLES),
     )
-    parser.add_argument(
+    custom_parser.add_argument(
         '--num-fcls',
         type=int,
         default=DEFAULT_NUM_FCLS,
         help='Number of FCLs',
     )
-    parser.add_argument(
+    custom_parser.add_argument(
         '--seed',
         type=int,
         default=DEFAULT_SEED,
         help='Seed for randomness in generating FCLs.'
     )
+
+    # Parse arguments
     argv = parser.parse_args()
 
+    # Print help if subcommand is not specified
+    if not argv.subcommand:
+        parser.print_help()
+        exit(1)
+
     # Generate FCLs
-    generate_fcls(
-        clique_sizes=argv.clique_sizes,
-        num_cycles=argv.num_cycles,
-        num_fcls=argv.num_fcls,
-        seed=argv.seed,
-    )
+    if argv.subcommand == 'predefined':
+        if argv.dataset in (ALL, DW_2000Q):
+            generate_dw_2000q_fcls()
+        if argv.dataset in (ALL, DW_8000Q):
+            generate_dw_8000q_fcls()
+        if argv.dataset in (ALL, DW_P6):
+            generate_dw_p6_fcls()
+        if argv.dataset in (ALL, DW_P12):
+            generate_dw_p12_fcls()
+
+    if argv.subcommand == 'custom':
+        generate_fcls(
+            dataset_name=argv.dataset_name,
+            clique_sizes=argv.clique_sizes,
+            num_cycles=argv.num_cycles,
+            num_fcls=argv.num_fcls,
+            seed=argv.seed,
+        )
 
 
 # Invoke main
