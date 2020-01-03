@@ -212,7 +212,7 @@ def main():
         # Run against all available datasets
         for dataset in _datasets():
 
-            logger.info('Processing dataset '.format(dataset))
+            logger.info('Processing dataset {}'.format(dataset))
 
             # Execute for each pair of fcl and timeout
             pairs = product(_fcls_from(dataset), HEURISTIC_TIMEOUTS_S)
