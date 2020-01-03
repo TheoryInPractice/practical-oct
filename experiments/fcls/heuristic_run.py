@@ -37,15 +37,17 @@ OUTPUT_HEADER = [
 ]
 
 
-def _run_he(name: str, timeout: int) -> Tuple[int, float, str]:
+def _run_he(dataset: str, name: str, timeout: int) -> Tuple[int, float, str]:
     """Run heuristic ensemble on all datasets.
 
     The ensemble will be run once for each timeout.
 
     Parameters
     ----------
-    name : str
+    dataset : str
         Dataset name.
+    name : str
+        FCL name.
     timeout : int
         Timeout in seconds.
 
@@ -60,7 +62,7 @@ def _run_he(name: str, timeout: int) -> Tuple[int, float, str]:
         [
             HEURISTIC_SOLVER,
             str(int(1000 * timeout)),
-            str(FCL_DATA_DIR / 'edgelist/{}.edgelist'.format(name))
+            str(FCL_DATA_DIR / dataset / 'edgelist/{}.edgelist'.format(name))
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
@@ -80,13 +82,15 @@ def _run_he(name: str, timeout: int) -> Tuple[int, float, str]:
     return size, time, certificate
 
 
-def _run_ilp(name: str, timeout: int) -> Tuple[int, float, str]:
+def _run_ilp(dataset: str, name: str, timeout: int) -> Tuple[int, float, str]:
     """Run ILP on all datasets.
 
     Parameters
     ----------
-    name : str
+    dataset : str
         Dataset name.
+    name : str
+        FCL name.
     timeout : int
         Timeout in seconds.
 
@@ -98,7 +102,9 @@ def _run_ilp(name: str, timeout: int) -> Tuple[int, float, str]:
     # Execute
     # Solved using CPLEX with timeout for a partial solution
     solution = solve_ilp(
-        read_edgelist(str(FCL_DATA_DIR / 'snap/{}.snap'.format(name))),
+        read_edgelist(str(
+            FCL_DATA_DIR / dataset / 'snap/{}.snap'.format(name)
+        )),
         formulation='VC',
         solver='CPLEX',
         threads=1,
@@ -110,13 +116,15 @@ def _run_ilp(name: str, timeout: int) -> Tuple[int, float, str]:
     return solution.opt, solution.time, solution.certificate
 
 
-def _run_ic(name: str, timeout: int) -> Tuple[int, float, str]:
+def _run_ic(dataset: str, name: str, timeout: int) -> Tuple[int, float, str]:
     """Run iterative compression on all datasets.
 
     Parameters
     ----------
-    name : str
+    dataset : str
         Dataset name.
+    name : str
+        FCL name.
     timeout : int
         Timeout in seconds.
 
@@ -133,7 +141,7 @@ def _run_ic(name: str, timeout: int) -> Tuple[int, float, str]:
 
     # Execute
     time, size, certificate = solve_ic(
-        str(FCL_DATA_DIR / 'huffner/{}.huffner'.format(name)),
+        str(FCL_DATA_DIR / dataset / 'huffner/{}.huffner'.format(name)),
         timeout=timeout,
         preprocessing=preprocessing,
         htime=min(0.3 * timeout, 1)
@@ -144,24 +152,44 @@ def _run_ic(name: str, timeout: int) -> Tuple[int, float, str]:
 
 
 def _datasets() -> Set[str]:
-    """Get FCL datasets available in all formats.
+    """Get all available datasets.
 
     Returns
     -------
     Set[str]
-        Names of all available datasets.
+        All available datasets.
+    """
+    return set(
+        dataset.stem
+        for dataset in FCL_DATA_DIR.glob('*')
+        if dataset.is_dir()
+    )
+
+
+def _fcls_from(dataset: str) -> Set[str]:
+    """Get FCLs from a dataset.
+
+    Parameters
+    ----------
+    dataset : str
+        Dataset name.
+
+    Returns
+    -------
+    Set[str]
+        Names of all available FCLs.
     """
     edgelist = set(map(
         lambda p: p.stem,
-        (FCL_DATA_DIR / 'edgelist').glob('*')
+        (FCL_DATA_DIR / dataset / 'edgelist').glob('*')
     ))
     huffner = set(map(
         lambda p: p.stem,
-        (FCL_DATA_DIR / 'huffner').glob('*')
+        (FCL_DATA_DIR / dataset / 'huffner').glob('*')
     ))
     snap = set(map(
         lambda p: p.stem,
-        (FCL_DATA_DIR / 'snap').glob('*')
+        (FCL_DATA_DIR / dataset / 'snap').glob('*')
     ))
 
     return edgelist & huffner & snap
@@ -181,51 +209,61 @@ def main():
         csv_writer = csv.writer(results_file_fd)
         csv_writer.writerow(OUTPUT_HEADER)
 
-        # Execute for each pair of dataset and timeout
-        for name, timeout in product(_datasets(), HEURISTIC_TIMEOUTS_S):
+        # Run against all available datasets
+        for dataset in _datasets():
 
-            logger.info('Solving {} with timeout {}ms'.format(name, timeout))
+            logger.info('Processing dataset '.format(dataset))
 
-            # Execute for each solver
-            for sn, solver in solvers:
+            # Execute for each pair of fcl and timeout
+            pairs = product(_fcls_from(dataset), HEURISTIC_TIMEOUTS_S)
+            for name, timeout in pairs:
 
-                logger.info('Running solver {}'.format(sn))
+                logger.info(
+                    'Solving {} with timeout {}s'.format(name, timeout)
+                )
 
-                # Try to execute heuristics
-                try:
+                # Execute for each solver
+                for sn, solver in solvers:
 
-                    size, time, certificate = solver(name, timeout)
+                    logger.info('Running solver {}'.format(sn))
 
-                    # Write results
-                    csv_writer.writerow([
-                        name,
-                        sn,
-                        timeout,
-                        time,
-                        size,
-                        certificate
-                    ])
+                    # Try to execute heuristics
+                    try:
 
-                except Exception as e:
+                        size, time, certificate = solver(
+                            dataset, name, timeout
+                        )
 
-                    # Log error
-                    logger.error(e)
+                        # Write results
+                        csv_writer.writerow([
+                            '{}/{}'.format(dataset, name),
+                            sn,
+                            timeout,
+                            time,
+                            size,
+                            certificate
+                        ])
 
-                    # Write empty row
-                    csv_writer.writerow([
-                        name,
-                        timeout,
-                        sn,
-                        float('nan'),
-                        float('nan'),
-                        float('nan')
-                    ])
+                    except Exception as e:
 
-                finally:
+                        # Log error
+                        logger.error(e)
 
-                    # Flush results so we at least get partial results if
-                    # something catastrophic causes the script to crash.
-                    results_file_fd.flush()
+                        # Write empty row
+                        csv_writer.writerow([
+                            name,
+                            timeout,
+                            sn,
+                            float('nan'),
+                            float('nan'),
+                            float('nan')
+                        ])
+
+                    finally:
+
+                        # Flush results so we at least get partial results if
+                        # something catastrophic causes the script to crash.
+                        results_file_fd.flush()
 
 
 # Invoke main
