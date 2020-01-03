@@ -39,13 +39,15 @@ OUTPUT_HEADER = [
 ]
 
 
-def _run_ai(name: str) -> Tuple[int, float, str]:
+def _run_ai(dataset: str, name: str) -> Tuple[int, float, str]:
     """Run Akiba-Iwata on a dataset.
 
     Parameters
     ----------
-    name : str
+    dataset : str
         Dataset name.
+    name : str
+        FCL name.
 
     Returns
     -------
@@ -54,20 +56,22 @@ def _run_ai(name: str) -> Tuple[int, float, str]:
     """
     # Execute
     time, size, certificate = solve_ai(
-        str(FCL_DATA_DIR / 'snap' / (name + SNAP_DATA_EXT)),
+        str(FCL_DATA_DIR / dataset / 'snap' / (name + SNAP_DATA_EXT)),
         timeout=EXACT_TIMEOUT,
         convert_to_oct=True
     )
     return size, time, certificate
 
 
-def _run_ilp(name: str) -> Tuple[int, float, str]:
+def _run_ilp(dataset: str, name: str) -> Tuple[int, float, str]:
     """Run ILP on all datasets.
 
     Parameters
     ----------
-    name : str
+    dataset : str
         Dataset name.
+    name : str
+        FCL name.
 
     Returns
     -------
@@ -76,7 +80,9 @@ def _run_ilp(name: str) -> Tuple[int, float, str]:
     """
     # Execute
     solution = solve_ilp(
-        read_edgelist(str(FCL_DATA_DIR / 'snap' / (name + SNAP_DATA_EXT))),
+        read_edgelist(str(
+            FCL_DATA_DIR / dataset / 'snap' / (name + SNAP_DATA_EXT)
+        )),
         formulation='VC',
         solver='CPLEX',
         threads=4,
@@ -88,13 +94,15 @@ def _run_ilp(name: str) -> Tuple[int, float, str]:
     return solution.opt, solution.time, solution.certificate
 
 
-def _run_ic(name: str) -> Tuple[int, float, str]:
+def _run_ic(dataset: str, name: str) -> Tuple[int, float, str]:
     """Run iterative compression on all datasets.
 
     Parameters
     ----------
-    name : str
+    dataset : str
         Dataset name.
+    name : str
+        FCL name.
 
     Returns
     -------
@@ -103,7 +111,7 @@ def _run_ic(name: str) -> Tuple[int, float, str]:
     """
     # Execute
     time, size, certificate = solve_ic(
-        str(FCL_DATA_DIR / 'huffner' / (name + HUFFNER_DATA_EXT)),
+        str(FCL_DATA_DIR / dataset / 'huffner' / (name + HUFFNER_DATA_EXT)),
         timeout=EXACT_TIMEOUT,
         preprocessing=2,
         htime=min(0.3 * EXACT_TIMEOUT, 1)
@@ -114,24 +122,44 @@ def _run_ic(name: str) -> Tuple[int, float, str]:
 
 
 def _datasets() -> Set[str]:
-    """Get FCL datasets available in all formats.
+    """Get all available datasets.
 
     Returns
     -------
     Set[str]
-        Names of all available datasets.
+        All available datasets.
+    """
+    return set(
+        dataset.stem
+        for dataset in FCL_DATA_DIR.glob('*')
+        if dataset.is_dir()
+    )
+
+
+def _fcls_from(dataset: str) -> Set[str]:
+    """Get FCLs from a dataset.
+
+    Parameters
+    ----------
+    dataset : str
+        Dataset name.
+
+    Returns
+    -------
+    Set[str]
+        Names of all available FCLs.
     """
     edgelist = set(map(
         lambda p: p.stem,
-        (FCL_DATA_DIR / 'edgelist').glob('*')
+        (FCL_DATA_DIR / dataset / 'edgelist').glob('*')
     ))
     huffner = set(map(
         lambda p: p.stem,
-        (FCL_DATA_DIR / 'huffner').glob('*')
+        (FCL_DATA_DIR / dataset / 'huffner').glob('*')
     ))
     snap = set(map(
         lambda p: p.stem,
-        (FCL_DATA_DIR / 'snap').glob('*')
+        (FCL_DATA_DIR / dataset / 'snap').glob('*')
     ))
 
     return edgelist & huffner & snap
@@ -151,49 +179,54 @@ def main():
         csv_writer = csv.writer(results_file_fd)
         csv_writer.writerow(OUTPUT_HEADER)
 
-        # Execute for each dataset
-        for name in _datasets():
+        # Run against all available datasets
+        for dataset in _datasets():
 
-            logger.info('Solving {}'.format(name))
+            logger.info('Processing dataset {}'.format(dataset))
 
-            # Execute for each solver
-            for sn, solver in solvers:
+            # Execute for each dataset
+            for name in _fcls_from(dataset):
 
-                logger.info('Running solver {}'.format(sn))
+                logger.info('Solving {}'.format(name))
 
-                # Try to execute heuristics
-                try:
+                # Execute for each solver
+                for sn, solver in solvers:
 
-                    size, time, certificate = solver(name)
+                    logger.info('Running solver {}'.format(sn))
 
-                    # Write results
-                    csv_writer.writerow([
-                        name,
-                        sn,
-                        time,
-                        size,
-                        certificate
-                    ])
+                    # Try to execute heuristics
+                    try:
 
-                except Exception as e:
+                        size, time, certificate = solver(dataset, name)
 
-                    # Log error
-                    logger.error(e)
+                        # Write results
+                        csv_writer.writerow([
+                            '{}/{}'.format(dataset, name),
+                            sn,
+                            time,
+                            size,
+                            certificate
+                        ])
 
-                    # Write empty row
-                    csv_writer.writerow([
-                        name,
-                        sn,
-                        float('nan'),
-                        float('nan'),
-                        float('nan')
-                    ])
+                    except Exception as e:
 
-                finally:
+                        # Log error
+                        logger.error(e)
 
-                    # Flush results so we at least get partial results if
-                    # something catastrophic causes the script to crash.
-                    results_file_fd.flush()
+                        # Write empty row
+                        csv_writer.writerow([
+                            name,
+                            sn,
+                            float('nan'),
+                            float('nan'),
+                            float('nan')
+                        ])
+
+                    finally:
+
+                        # Flush results so we at least get partial results if
+                        # something catastrophic causes the script to crash.
+                        results_file_fd.flush()
 
 
 # Invoke main
