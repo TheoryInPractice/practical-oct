@@ -26,6 +26,12 @@ DW_2000Q = 'dw_2000q'
 DW_8000Q = 'dw_8000q'
 DW_P6 = 'dw_p6'
 DW_P12 = 'dw_p12'
+LONG_NAMES = {
+    DW_2000Q: 'D-Wave 2000Q',
+    DW_8000Q: 'D-Wave 8000Q',
+    DW_P6: 'D-Wave Pegasus(6)',
+    DW_P12: 'D-Wave Pegasus(12)'
+}
 DW_2000Q_CLIQUE_SIZES = tuple(range(64, 129, 16))
 DW_8000Q_CLIQUE_SIZES = tuple(range(128, 257, 16))
 DW_P6_CLIQUE_SIZES = tuple(range(62, 105, 7))
@@ -139,7 +145,11 @@ def generate_fcls(dataset_name: str,
     x, y, hue = zip(*data)
     hue = tuple((clique_size, int(cycles * 100)) for clique_size, cycles in hue)
     sns.scatterplot(x=x, y=y, hue=hue)
-    plt.title('Frustrated Cluster Loops')
+    if dataset_name in LONG_NAMES:
+        title_dataset_name = LONG_NAMES[dataset_name]
+    else:
+        title_dataset_name = dataset_name.replace('_', '\\_')
+    plt.title('Frustrated Cluster Loops ({})'.format(title_dataset_name))
     plt.xlabel('Nodes')
     plt.ylabel('Edges')
     plt.legend(
