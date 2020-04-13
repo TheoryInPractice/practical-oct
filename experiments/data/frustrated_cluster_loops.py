@@ -12,7 +12,7 @@ import argparse
 import random
 
 from dimod.generators.fcl import frustrated_loop
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt, rc
 import networkx as nx
 import seaborn as sns
 
@@ -42,6 +42,7 @@ MAX_SEED = 2**32 - 1
 
 # Matplotlib options
 DPI = 300
+rc('text', usetex=True)
 
 
 def generate_fcls(dataset_name: str,
@@ -133,18 +134,22 @@ def generate_fcls(dataset_name: str,
             ))
 
     # Plot stats
+    # Convert num_cycles to a percentage.
+    logger.info('Plotting generated FCLs.')
     x, y, hue = zip(*data)
+    hue = tuple((clique_size, int(cycles * 100)) for clique_size, cycles in hue)
     sns.scatterplot(x=x, y=y, hue=hue)
     plt.title('Frustrated Cluster Loops')
     plt.xlabel('Nodes')
     plt.ylabel('Edges')
     plt.legend(
-        title='(clique_size, num_cycles)',
-        loc='upper left',
-        bbox_to_anchor=(1.0, 1.0,),
+        title='(Clique Size, Percent Cycles)',
+        loc='center left',
+        bbox_to_anchor=(1.0, 0.0, 1.0, 1.0),
+        ncol=len(clique_sizes),
     )
     plt.savefig(
-        '{}/plot.png'.format(str(dataset_dir)),
+        '{}/plot.pdf'.format(str(dataset_dir)),
         dpi=DPI,
         bbox_inches='tight',
     )
