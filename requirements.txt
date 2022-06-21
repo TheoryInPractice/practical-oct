@@ -3,7 +3,7 @@ decorator==4.2.1
 dimod==0.8.18
 matplotlib==2.1.0
 networkx==2.1
-numpy==1.17.4
+numpy==1.22.0
 pandas==0.22.0
 pyparsing==2.2.0
 python-dateutil==2.6.1
